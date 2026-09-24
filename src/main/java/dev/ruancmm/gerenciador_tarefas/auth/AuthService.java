@@ -6,10 +6,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import dev.ruancmm.gerenciador_tarefas.users.User;
-import dev.ruancmm.gerenciador_tarefas.users.UserRequest;
-import dev.ruancmm.gerenciador_tarefas.users.UserResponse;
 import dev.ruancmm.gerenciador_tarefas.users.UserRepository;
 import dev.ruancmm.gerenciador_tarefas.users.UserService;
+import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserCreateRequest;
+import dev.ruancmm.gerenciador_tarefas.users.dto.response.UserResponse;
 
 @Service
 public class AuthService {
@@ -26,7 +26,7 @@ public class AuthService {
       this.jwtUtil = jwtUtil;
 	}
 
-  public UserResponse register(UserRequest request) {
+  public UserResponse register(UserCreateRequest request) {
     return userService.create(request);
   }
 

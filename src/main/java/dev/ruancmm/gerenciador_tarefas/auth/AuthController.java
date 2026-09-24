@@ -3,13 +3,13 @@ package dev.ruancmm.gerenciador_tarefas.auth;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import dev.ruancmm.gerenciador_tarefas.users.UserRequest;
-import dev.ruancmm.gerenciador_tarefas.users.UserResponse;
+import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserCreateRequest;
+import dev.ruancmm.gerenciador_tarefas.users.dto.response.UserResponse;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import jakarta.validation.Valid;
 
@@ -24,21 +24,18 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse register(@RequestBody @Valid UserRequest dto) {
-        return authService.register(dto);
+    public ResponseEntity<UserResponse> register(@RequestBody @Valid UserCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 
     @PostMapping("/login")
-    @ResponseStatus(HttpStatus.OK)
-    public Map<String, String> login(@RequestBody @Valid LoginDTO dto) {
-        return authService.login(dto.email(), dto.password());
+    public ResponseEntity<Map<String, String>> login(@RequestBody @Valid LoginRequest request ) {
+        return ResponseEntity.ok(authService.login(request.email(), request.password()));
     }
 
     @PostMapping("/refresh")
-    @ResponseStatus(HttpStatus.OK)
-    public Map<String, String> refresh(@RequestBody Map<String, String> body) {
+    public ResponseEntity<Map<String, String>> refresh(@RequestBody Map<String, String> body) {
         String newAccessToken = authService.refresh(body.get("refreshToken"));
-        return Map.of("accessToken", newAccessToken);
+        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
 }
