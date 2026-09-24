@@ -6,7 +6,7 @@ public record UserResponse(
     String email
 ) {
 
-    public UserResponse fromEntity(User user) {
+    public static UserResponse fromEntity(User user) {
         return new UserResponse(user.getId(), user.getName(), user.getEmail());
     }
 }
