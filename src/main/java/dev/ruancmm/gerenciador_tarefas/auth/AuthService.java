@@ -2,12 +2,15 @@ package dev.ruancmm.gerenciador_tarefas.auth;
 
 import java.util.Map;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import dev.ruancmm.gerenciador_tarefas.auth.exception.InvalidCredentialsException;
 import dev.ruancmm.gerenciador_tarefas.users.User;
-import dev.ruancmm.gerenciador_tarefas.users.UserRepository;
 import dev.ruancmm.gerenciador_tarefas.users.UserService;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.response.UserResponse;
@@ -15,15 +18,13 @@ import dev.ruancmm.gerenciador_tarefas.users.dto.response.UserResponse;
 @Service
 public class AuthService {
 
-  private final UserRepository userRepository;
+  private final AuthenticationManager authenticationManager;
   private final UserService userService;
-  private final PasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
 	
-  public AuthService(UserRepository userRepository, UserService userService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
-      this.userRepository = userRepository;
+  public AuthService(AuthenticationManager authenticationManager, UserService userService, JwtUtil jwtUtil) {
+      this.authenticationManager = authenticationManager;
       this.userService = userService;
-      this.passwordEncoder = passwordEncoder;
       this.jwtUtil = jwtUtil;
 	}
 
@@ -32,17 +33,20 @@ public class AuthService {
   }
 
   public Map<String, String> login(String email, String password) {
-      User user = userRepository.findByEmail(email)
-        .orElseThrow(InvalidCredentialsException::new);
-
-      if (!passwordEncoder.matches(password, user.getPassword())) {
-        throw new InvalidCredentialsException();
-      }
-
+    try {
+      Authentication auth = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(email, password)
+      );
+  
+      User user = (User) auth.getPrincipal();
+  
       return Map.of(
         "accessToken", jwtUtil.generateAccessToken(user.getId()),
         "refreshToken", jwtUtil.generateRefreshToken(user.getId())
       );
+    } catch (BadCredentialsException | UsernameNotFoundException e) {
+      throw new InvalidCredentialsException();
+    }
   }
 
   public String refresh(String refreshToken) {
