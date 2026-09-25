@@ -38,7 +38,7 @@ public class TaskController {
     }
 
     @GetMapping("/list")
-    public Page<TaskResponse> list(@RequestBody TaskFilterRequest filter, Pageable pageable, @AuthenticationPrincipal User user) {
+    public Page<TaskResponse> list(TaskFilterRequest filter, Pageable pageable, @AuthenticationPrincipal User user) {
         return taskService.list(filter, pageable, user.getId());
     }
 
