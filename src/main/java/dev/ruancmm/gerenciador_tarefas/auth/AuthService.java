@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import dev.ruancmm.gerenciador_tarefas.auth.exception.InvalidCredentialsException;
 import dev.ruancmm.gerenciador_tarefas.users.User;
 import dev.ruancmm.gerenciador_tarefas.users.UserRepository;
 import dev.ruancmm.gerenciador_tarefas.users.UserService;
@@ -32,10 +33,10 @@ public class AuthService {
 
   public Map<String, String> login(String email, String password) {
       User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+        .orElseThrow(InvalidCredentialsException::new);
 
       if (!passwordEncoder.matches(password, user.getPassword())) {
-        throw new RuntimeException("Invalid credentials");
+        throw new InvalidCredentialsException();
       }
 
       return Map.of(
@@ -48,7 +49,7 @@ public class AuthService {
     Long userId = jwtUtil.extractUserId(refreshToken, "refresh");
 
     if (userId == null) {
-      throw new RuntimeException("Invalid credentials");
+      throw new InvalidCredentialsException();
     }
 
     return jwtUtil.generateRefreshToken(userId);

@@ -7,6 +7,9 @@ import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserUpdateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserUpdatePasswordRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.response.UserResponse;
+import dev.ruancmm.gerenciador_tarefas.users.exception.AuthenticationException;
+import dev.ruancmm.gerenciador_tarefas.users.exception.EmailAlreadyExistsException;
+import dev.ruancmm.gerenciador_tarefas.users.exception.PasswordReuseException;
 
 @Service
 public class UserService {
@@ -21,7 +24,7 @@ public class UserService {
 
     public UserResponse create(UserCreateRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new RuntimeException("Email already exists");
+            throw new EmailAlreadyExistsException();
         }
 
         String hashedPassword = passwordEncoder.encode(request.password());
@@ -43,11 +46,11 @@ public class UserService {
 
     public void updatePassword(UserUpdatePasswordRequest request, User currentUser) {
         if (request.password().equals(request.newPassword())) {
-            throw new RuntimeException("New password cannot be the same as the current password");
+            throw new PasswordReuseException();
         }
 
         if (!passwordEncoder.matches(request.password(), currentUser.getPassword())) {
-            throw new RuntimeException("Invalid password");
+            throw new AuthenticationException();
         }
 
         String newHashedPassword = passwordEncoder.encode(request.newPassword());
