@@ -33,7 +33,7 @@ public class UserService {
     }
 
     public UserResponse update(UserUpdateRequest request, User currentUser) {
-        if (request.name() != null) {
+        if (request.name() != null && !request.name().isBlank()) {
             currentUser.setName(request.name());
         }
 

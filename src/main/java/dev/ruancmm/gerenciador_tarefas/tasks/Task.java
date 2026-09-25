@@ -53,7 +53,15 @@ public class Task {
     private LocalDateTime updatedAt;
 
     @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
+    private LocalDateTime deletedAt = null;
+
+    public Task() {}
+
+    public Task(User user, String title, String description) {
+        this.user = user;
+        this.title = title;
+        this.description = description;
+    }
 
     public Long getId() {
         return id;
