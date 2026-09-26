@@ -38,4 +38,9 @@ public class AuthController {
         String newAccessToken = authService.refresh(body.get("refreshToken"));
         return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
     }
+
+    @PostMapping("/restore")
+    public ResponseEntity<Map<String, String>> restore(@RequestBody @Valid LoginRequest request) {
+        return ResponseEntity.ok(authService.restoreAndLogin(request.email(), request.password()));
+    }
 }

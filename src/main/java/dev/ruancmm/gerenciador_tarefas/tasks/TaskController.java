@@ -19,10 +19,12 @@ import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskFilterRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskUpdateRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.response.TaskResponse;
 import dev.ruancmm.gerenciador_tarefas.users.User;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/tasks")
+@SecurityRequirement(name = "bearerAuth")
 public class TaskController {
 
     private final TaskService taskService;

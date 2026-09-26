@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserUpdateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserUpdatePasswordRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.response.UserResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     private final UserService userService;
