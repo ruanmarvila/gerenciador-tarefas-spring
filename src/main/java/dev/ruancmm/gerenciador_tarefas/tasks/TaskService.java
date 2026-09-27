@@ -1,8 +1,11 @@
 package dev.ruancmm.gerenciador_tarefas.tasks;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import dev.ruancmm.gerenciador_tarefas.core.exception.AuthorizationException;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskCreateRequest;
@@ -31,6 +34,14 @@ public class TaskService {
             .map(TaskResponse::fromEntity);
     }
 
+    public List<TaskResponse> listDeleted(Long userId) {
+        return taskRepository.findAllDeletedByUserId(userId)
+            .orElseThrow(TaskNotFoundException::new)
+            .stream()
+                .map(TaskResponse::fromEntity)
+                .toList();
+    }
+
     public TaskResponse update(TaskUpdateRequest request, Long id, User currentUser) {
         Task task = taskRepository.findById(id)
             .orElseThrow(TaskNotFoundException::new);
@@ -54,6 +65,18 @@ public class TaskService {
         return TaskResponse.fromEntity(taskRepository.save(task));
     }
 
+    public TaskResponse restore(Long id, User currentUser) {
+        Task task = taskRepository.findDeletedById(id)
+            .orElseThrow(TaskNotFoundException::new);
+        
+        if (task.getUser().getId() != currentUser.getId()) {
+            throw new AuthorizationException();
+        }
+
+        task.setDeletedAt(null);
+        return TaskResponse.fromEntity(taskRepository.save(task));
+    }
+
     public void delete(Long id, User currentUser) {
         Task task = taskRepository.findById(id)
             .orElseThrow(TaskNotFoundException::new);
@@ -63,6 +86,11 @@ public class TaskService {
         }
 
         taskRepository.delete(task);
+    }
+
+    @Transactional
+    public void emptyTrash(Long userId) {
+        taskRepository.deleteAllDeletedByUserId(userId);
     }
 
 }

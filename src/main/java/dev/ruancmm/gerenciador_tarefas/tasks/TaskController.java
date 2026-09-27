@@ -1,5 +1,7 @@
 package dev.ruancmm.gerenciador_tarefas.tasks;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -44,6 +46,11 @@ public class TaskController {
         return taskService.list(filter, pageable, user.getId());
     }
 
+    @GetMapping("/trash")
+    public ResponseEntity<List<TaskResponse>> trash(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(taskService.listDeleted(user.getId()));
+    }
+
     @PatchMapping("/update/{id}")
     public ResponseEntity<TaskResponse> update(
         @PathVariable Long id, 
@@ -57,6 +64,18 @@ public class TaskController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, @AuthenticationPrincipal User user) {
         taskService.delete(id, user);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/trash/restore/{id}")
+    public ResponseEntity<TaskResponse> restore(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        TaskResponse task = taskService.restore(id, user);
+        return ResponseEntity.ok(task);
+    }
+
+    @DeleteMapping("/trash/empty")
+    public ResponseEntity<?> emptyTrash(@AuthenticationPrincipal User user) {
+        taskService.emptyTrash(user.getId());
         return ResponseEntity.noContent().build();
     }
 }
