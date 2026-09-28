@@ -67,7 +67,7 @@ public class TaskController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/trash/restore/{id}")
+    @PostMapping("restore/{id}")
     public ResponseEntity<TaskResponse> restore(@PathVariable Long id, @AuthenticationPrincipal User user) {
         TaskResponse task = taskService.restore(id, user);
         return ResponseEntity.ok(task);
