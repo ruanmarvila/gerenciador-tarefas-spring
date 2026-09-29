@@ -1,4 +1,4 @@
-package dev.ruancmm.gerenciador_tarefas.auth;
+package dev.ruancmm.gerenciador_tarefas.auth.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

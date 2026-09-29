@@ -2,7 +2,6 @@ package dev.ruancmm.gerenciador_tarefas.auth;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Map;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,6 +11,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import dev.ruancmm.gerenciador_tarefas.auth.dto.request.RefreshRequest;
+import dev.ruancmm.gerenciador_tarefas.auth.dto.response.AccessTokenResponse;
+import dev.ruancmm.gerenciador_tarefas.auth.dto.response.TokenResponse;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountAlreadyActivateException;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountDisabledException;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.InvalidCredentialsException;
@@ -42,7 +44,7 @@ public class AuthService {
     return userService.create(request);
   }
 
-  public Map<String, String> login(String email, String password) {
+  public TokenResponse login(String email, String password) {
     try {
       Authentication auth = authenticationManager.authenticate(
         new UsernamePasswordAuthenticationToken(email, password)
@@ -50,9 +52,9 @@ public class AuthService {
   
       User user = (User) auth.getPrincipal();
   
-      return Map.of(
-        "accessToken", jwtUtil.generateAccessToken(user.getId()),
-        "refreshToken", jwtUtil.generateRefreshToken(user.getId())
+      return new TokenResponse(
+        jwtUtil.generateAccessToken(user.getId()),
+        jwtUtil.generateRefreshToken(user.getId())
       );
     } catch (BadCredentialsException | UsernameNotFoundException e) {
       verifyPendingRestore(email, password);
@@ -60,17 +62,17 @@ public class AuthService {
     }
   }
 
-  public String refresh(String refreshToken) {
-    Long userId = jwtUtil.extractUserId(refreshToken, "refresh");
+  public AccessTokenResponse refresh(RefreshRequest request) {
+    Long userId = jwtUtil.extractUserId(request.refreshToken(), "refresh");
 
     if (userId == null) {
       throw new InvalidCredentialsException();
     }
 
-    return jwtUtil.generateAccessToken(userId);
+    return new AccessTokenResponse(jwtUtil.generateAccessToken(userId));
   }
 
-  public Map<String, String> restoreAndLogin(String email, String password) {
+  public TokenResponse restoreAndLogin(String email, String password) {
     User user = userRepository.findByEmailIncludingDeleted(email).
       orElseThrow(InvalidCredentialsException::new);
 
@@ -89,10 +91,10 @@ public class AuthService {
     user.setDeletedAt(null);
     userRepository.save(user);
 
-    return Map.of(
-        "accessToken", jwtUtil.generateAccessToken(user.getId()),
-        "refreshToken", jwtUtil.generateRefreshToken(user.getId())
-      );
+    return new TokenResponse(
+      jwtUtil.generateAccessToken(user.getId()),
+      jwtUtil.generateRefreshToken(user.getId())
+    );
   }
   
   private void verifyPendingRestore(String email, String password) {

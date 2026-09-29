@@ -1,7 +1,5 @@
 package dev.ruancmm.gerenciador_tarefas.auth;
 
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +7,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.ruancmm.gerenciador_tarefas.auth.dto.request.LoginRequest;
+import dev.ruancmm.gerenciador_tarefas.auth.dto.request.RefreshRequest;
+import dev.ruancmm.gerenciador_tarefas.auth.dto.response.AccessTokenResponse;
+import dev.ruancmm.gerenciador_tarefas.auth.dto.response.TokenResponse;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.response.UserResponse;
 import jakarta.validation.Valid;
@@ -29,18 +31,17 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> login(@RequestBody @Valid LoginRequest request ) {
+    public ResponseEntity<TokenResponse> login(@RequestBody @Valid LoginRequest request ) {
         return ResponseEntity.ok(authService.login(request.email(), request.password()));
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<Map<String, String>> refresh(@RequestBody Map<String, String> body) {
-        String newAccessToken = authService.refresh(body.get("refreshToken"));
-        return ResponseEntity.ok(Map.of("accessToken", newAccessToken));
+    public ResponseEntity<AccessTokenResponse> refresh(@RequestBody @Valid RefreshRequest request) {
+        return ResponseEntity.ok(authService.refresh(request));
     }
 
     @PostMapping("/restore")
-    public ResponseEntity<Map<String, String>> restore(@RequestBody @Valid LoginRequest request) {
+    public ResponseEntity<TokenResponse> restore(@RequestBody @Valid LoginRequest request) {
         return ResponseEntity.ok(authService.restoreAndLogin(request.email(), request.password()));
     }
 }
