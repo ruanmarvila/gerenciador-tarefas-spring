@@ -110,8 +110,8 @@ Each domain owns its own Controller, Service, Repository, entities, DTOs and exc
 │   │   │   │   ├── CustomUserDetailsService.java
 │   │   │   │   ├── JwtAuthFilter.java
 │   │   │   │   ├── JwtUtil.java
-│   │   │   │   ├── LoginRequest.java
-│   │   │   │   └── exception/
+│   │   │   │   ├── exception/
+│   │   │   │   └── dto/
 │   │   │   │
 │   │   │   ├── users/          # User domain
 │   │   │   │   ├── User.java

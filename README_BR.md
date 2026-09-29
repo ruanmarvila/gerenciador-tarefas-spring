@@ -108,8 +108,8 @@ Cada domínio possui seu próprio Controller, Service, Repository, entidades, DT
 │   │   │   │   ├── CustomUserDetailsService.java
 │   │   │   │   ├── JwtAuthFilter.java
 │   │   │   │   ├── JwtUtil.java
-│   │   │   │   ├── LoginRequest.java
-│   │   │   │   └── exception/
+│   │   │   │   ├── exception/
+│   │   │   │   └── dto/
 │   │   │   │
 │   │   │   ├── users/          # Domínio de usuário
 │   │   │   │   ├── User.java
