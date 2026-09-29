@@ -67,7 +67,7 @@ public class AuthService {
       throw new InvalidCredentialsException();
     }
 
-    return jwtUtil.generateRefreshToken(userId);
+    return jwtUtil.generateAccessToken(userId);
   }
 
   public Map<String, String> restoreAndLogin(String email, String password) {
