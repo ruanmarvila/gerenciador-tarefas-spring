@@ -2,7 +2,7 @@
 
 ![Java](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen) ![Spring Security](https://img.shields.io/badge/Spring%20Security-JWT-green) ![Licença](https://img.shields.io/badge/license-MIT-lightgrey)
 
-Uma API RESTful para gerenciamento de tarefas desenvolvido em Java com Spring Boot. Esse projeto é uma tradução de um projeto anterior [FastAPI version](https://github.com/ruanmarvila/gerenciador-tarefas), redesenvolvido para aprender o ecossistema Spring: arquitetura em camadas organizada por domínio, JPA, Spring Security com JWT, migrações de banco, e testes automatizados.
+Uma API RESTful para gerenciamento de tarefas desenvolvido em Java com Spring Boot. Esse projeto é uma tradução de um projeto anterior [versão FastAPI](https://github.com/ruanmarvila/gerenciador-tarefas), redesenvolvido para aprender o ecossistema Spring: arquitetura em camadas organizada por domínio, JPA, Spring Security com JWT, migrações de banco, e testes automatizados.
 
 ---
 
@@ -239,7 +239,7 @@ POST /auth/register
 - [x] Tratamento global de exceções (`BusinessException`)
 - [x] Swagger UI com o Bearer token
 - [ ] Testes unitários (services) com JUnit 5 e Mockito
-- [ ] Testes de Repository (`@DataJpaTest`) e de Controllers (`@MOckMvc`)
+- [ ] Testes de Repository (`@DataJpaTest`) e de Controllers (`@MockMvc`)
 - [ ] Mover as configurações de JWT, para os tokens sobreviverem à reinicialização
 
 ### 3. Produção

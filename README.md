@@ -202,7 +202,7 @@ Protected endpoints require a token. Use `/auth/login` to obtain one, then click
 ### Examples of Request and Response:
 
 ```http
-POST auth/register
+POST /auth/register
 ```
 
 1. **Request:**
