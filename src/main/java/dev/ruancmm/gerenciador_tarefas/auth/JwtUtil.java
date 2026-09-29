@@ -7,8 +7,11 @@ import javax.crypto.SecretKey;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
+
+import dev.ruancmm.gerenciador_tarefas.auth.exception.InvalidTokenException;
 
 @Component
 public class JwtUtil {
@@ -43,12 +46,20 @@ public class JwtUtil {
                 .getPayload();
 
             if (!expectedType.equals(claims.get("type", String.class))) {
-                return null;
+                throw new InvalidTokenException("Invalid token type");
+            }
+
+            if (claims.getSubject() == null) {
+                throw new InvalidTokenException("Token without userId");
             }
 
             return Long.valueOf(claims.getSubject());
-        } catch (JwtException | NumberFormatException e) {
-            return null;
+        } catch (NumberFormatException e) {
+            throw new InvalidTokenException("Invalid userId in token");
+        } catch (ExpiredJwtException e) {
+            throw new InvalidTokenException("Token expired");
+        } catch (JwtException e) {
+            throw new InvalidTokenException("Invalid Token");
         }
     }
 }

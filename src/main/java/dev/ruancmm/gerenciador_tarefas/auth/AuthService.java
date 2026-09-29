@@ -64,11 +64,6 @@ public class AuthService {
 
   public AccessTokenResponse refresh(RefreshRequest request) {
     Long userId = jwtUtil.extractUserId(request.refreshToken(), "refresh");
-
-    if (userId == null) {
-      throw new InvalidCredentialsException();
-    }
-
     return new AccessTokenResponse(jwtUtil.generateAccessToken(userId));
   }
 
