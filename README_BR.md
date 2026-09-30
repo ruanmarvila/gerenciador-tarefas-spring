@@ -131,7 +131,8 @@ Cada domínio possui seu próprio Controller, Service, Repository, entidades, DT
 │   │   │   │
 │   │   │   ├── core/           # Configurações globais
 │   │   │   │   ├── exception/
-│   │   │   │   └── security/
+│   │   │   │   ├── security/
+│   │   │   │   └── validation/
 │   │   │   │
 │   │   │   └── GerenciadorTarefasApplication.java
 │   │   │

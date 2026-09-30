@@ -133,7 +133,8 @@ Each domain owns its own Controller, Service, Repository, entities, DTOs and exc
 │   │   │   │
 │   │   │   ├── core/           # Global configurations
 │   │   │   │   ├── exception/
-│   │   │   │   └── security/
+│   │   │   │   ├── security/
+│   │   │   │   └── validation/
 │   │   │   │
 │   │   │   └── GerenciadorTarefasApplication.java
 │   │   │
