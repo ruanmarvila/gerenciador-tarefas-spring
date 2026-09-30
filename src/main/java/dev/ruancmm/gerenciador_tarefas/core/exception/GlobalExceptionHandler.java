@@ -22,7 +22,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handlerValidationException(MethodArgumentNotValidException ex) {
         ErrorResponse exception = new ErrorResponse(
-            LocalDateTime.now(), HttpStatus.UNPROCESSABLE_CONTENT.value(), ex.getMessage()
+            LocalDateTime.now(), 
+            HttpStatus.UNPROCESSABLE_CONTENT.value(), 
+            ex.getAllErrors().get(0).getDefaultMessage()
         );
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(exception);
     }

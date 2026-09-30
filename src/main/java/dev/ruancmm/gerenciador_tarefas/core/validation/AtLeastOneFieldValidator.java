@@ -27,7 +27,7 @@ public class AtLeastOneFieldValidator implements ConstraintValidator<AtLeastOneF
 
                 Object value = field.get(object);
 
-                if (value != null) {
+                if (value != null && !(value instanceof String string && string.isBlank())) {
                     return true;
                 }
             } catch (NoSuchFieldException | IllegalAccessException e) {
