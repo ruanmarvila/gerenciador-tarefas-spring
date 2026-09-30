@@ -59,8 +59,8 @@ public class Task {
 
     public Task(User user, String title, String description) {
         this.user = user;
-        this.title = title;
-        this.description = description;
+        setTitle(title);
+        setDescription(description);
     }
 
     public Long getId() {
@@ -84,7 +84,7 @@ public class Task {
     }
 
     public void setTitle(String title) {
-        this.title = title;
+        this.title = title == null || title.isBlank() ? "title" : title;
     }
 
     public String getDescription() {
@@ -92,7 +92,7 @@ public class Task {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description = description == null || description.isBlank() ? "description" : description;
     }
 
     public TaskStatus getStatus() {

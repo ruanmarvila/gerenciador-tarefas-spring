@@ -22,7 +22,6 @@ import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskUpdateRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.response.TaskResponse;
 import dev.ruancmm.gerenciador_tarefas.users.User;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/tasks")
@@ -36,7 +35,7 @@ public class TaskController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<TaskResponse> create(@RequestBody @Valid TaskCreateRequest request, @AuthenticationPrincipal User user) {
+    public ResponseEntity<TaskResponse> create(@RequestBody TaskCreateRequest request, @AuthenticationPrincipal User user) {
         TaskResponse task = taskService.create(request, user);
         return ResponseEntity.status(HttpStatus.CREATED).body(task);
     }
