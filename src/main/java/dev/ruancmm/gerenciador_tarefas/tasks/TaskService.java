@@ -1,7 +1,5 @@
 package dev.ruancmm.gerenciador_tarefas.tasks;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -34,12 +32,9 @@ public class TaskService {
             .map(TaskResponse::fromEntity);
     }
 
-    public List<TaskResponse> listDeleted(Long userId) {
-        return taskRepository.findAllDeletedByUserId(userId)
-            .orElseThrow(TaskNotFoundException::new)
-            .stream()
-                .map(TaskResponse::fromEntity)
-                .toList();
+    public Page<TaskResponse> listDeleted(Pageable pageable, Long userId) {
+        return taskRepository.findAll(TaskSpecification.onlyDeleted(userId), pageable)
+            .map(TaskResponse::fromEntity);
     }
 
     public TaskResponse update(TaskUpdateRequest request, Long id, User currentUser) {

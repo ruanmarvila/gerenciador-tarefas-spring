@@ -1,6 +1,5 @@
 package dev.ruancmm.gerenciador_tarefas.tasks;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,13 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificationExecutor<Task> {
-    
-    @Query(
-        value = "SELECT * FROM tasks WHERE user_id = :userId AND deleted_at IS NOT NULL",
-        nativeQuery = true
-    )
-    Optional<List<Task>> findAllDeletedByUserId(@Param("userId") Long userId);
-
     @Query(
         value = "SELECT * FROM tasks WHERE id = :id AND deleted_at IS NOT NULL",
         nativeQuery = true

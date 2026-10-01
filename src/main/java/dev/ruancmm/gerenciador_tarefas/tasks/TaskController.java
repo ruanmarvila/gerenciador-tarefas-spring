@@ -1,7 +1,5 @@
 package dev.ruancmm.gerenciador_tarefas.tasks;
 
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -46,8 +44,8 @@ public class TaskController {
     }
 
     @GetMapping("/trash")
-    public ResponseEntity<List<TaskResponse>> trash(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(taskService.listDeleted(user.getId()));
+    public Page<TaskResponse> trash(Pageable pageable, @AuthenticationPrincipal User user) {
+        return taskService.listDeleted(pageable, user.getId());
     }
 
     @PatchMapping("/update/{id}")
