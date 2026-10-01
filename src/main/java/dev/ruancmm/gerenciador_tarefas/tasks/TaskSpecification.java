@@ -16,7 +16,7 @@ public class TaskSpecification {
 
     public static Specification<Task> onlyDeleted(Long userId) {
         return (root, query, cb) -> cb.and(
-            cb.equal(root.get("userId"), userId),
+            cb.equal(root.get("user").get("id"), userId),
             cb.isNotNull(root.get("deletedAt"))
         );
     }
