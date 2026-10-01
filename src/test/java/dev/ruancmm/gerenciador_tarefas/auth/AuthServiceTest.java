@@ -26,7 +26,7 @@ import dev.ruancmm.gerenciador_tarefas.auth.dto.response.AccessTokenResponse;
 import dev.ruancmm.gerenciador_tarefas.auth.dto.response.TokenResponse;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountAlreadyActivateException;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountDisabledException;
-import dev.ruancmm.gerenciador_tarefas.auth.exception.InvalidCredentialsException;
+import dev.ruancmm.gerenciador_tarefas.core.exception.AuthenticationException;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.response.UserResponse;
 import dev.ruancmm.gerenciador_tarefas.users.User;
@@ -107,7 +107,7 @@ public class AuthServiceTest {
             .thenThrow(new BadCredentialsException("Bad Credentials"));
         
         assertThrows(
-            InvalidCredentialsException.class,
+            AuthenticationException.class,
             () -> authService.login(email, password)
         );
     }
@@ -121,7 +121,7 @@ public class AuthServiceTest {
             .thenThrow(new UsernameNotFoundException("user not found"));
         
         assertThrows(
-            InvalidCredentialsException.class,
+            AuthenticationException.class,
             () -> authService.login(email, password)
         );
     }
@@ -167,7 +167,7 @@ public class AuthServiceTest {
         user.setDeletedAt(LocalDateTime.now().minusDays(31));
 
         assertThrows(
-            InvalidCredentialsException.class,
+            AuthenticationException.class,
             () -> authService.login(email, password)
         );
     }
@@ -227,7 +227,7 @@ public class AuthServiceTest {
             .thenReturn(Optional.empty());
         
         assertThrows(
-            InvalidCredentialsException.class,
+            AuthenticationException.class,
             () -> authService.restoreAndLogin(email, password)
         );
     }
@@ -245,7 +245,7 @@ public class AuthServiceTest {
             .thenReturn(false);
         
         assertThrows(
-            InvalidCredentialsException.class,
+            AuthenticationException.class,
             () -> authService.restoreAndLogin(email, password)
         );
     }
@@ -284,7 +284,7 @@ public class AuthServiceTest {
         user.setId(1L);
 
         assertThrows(
-            InvalidCredentialsException.class,
+            AuthenticationException.class,
             () -> authService.restoreAndLogin(email, password)
         );
     }

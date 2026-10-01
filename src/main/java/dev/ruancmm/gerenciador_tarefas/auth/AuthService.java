@@ -16,7 +16,7 @@ import dev.ruancmm.gerenciador_tarefas.auth.dto.response.AccessTokenResponse;
 import dev.ruancmm.gerenciador_tarefas.auth.dto.response.TokenResponse;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountAlreadyActivateException;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountDisabledException;
-import dev.ruancmm.gerenciador_tarefas.auth.exception.InvalidCredentialsException;
+import dev.ruancmm.gerenciador_tarefas.core.exception.AuthenticationException;
 import dev.ruancmm.gerenciador_tarefas.users.User;
 import dev.ruancmm.gerenciador_tarefas.users.UserRepository;
 import dev.ruancmm.gerenciador_tarefas.users.UserService;
@@ -58,7 +58,7 @@ public class AuthService {
       );
     } catch (BadCredentialsException | UsernameNotFoundException e) {
       verifyPendingRestore(email, password);
-      throw new InvalidCredentialsException();
+      throw new AuthenticationException();
     }
   }
 
@@ -69,10 +69,10 @@ public class AuthService {
 
   public TokenResponse restoreAndLogin(String email, String password) {
     User user = userRepository.findByEmailIncludingDeleted(email).
-      orElseThrow(InvalidCredentialsException::new);
+      orElseThrow(AuthenticationException::new);
 
     if (!passwordEncoder.matches(password, user.getPassword())) {
-      throw new InvalidCredentialsException();
+      throw new AuthenticationException();
     }
 
     if (user.getDeletedAt() == null) {
@@ -80,7 +80,7 @@ public class AuthService {
     }
 
     if (Duration.between(user.getDeletedAt(), LocalDateTime.now()).toDays() > 30) {
-      throw new InvalidCredentialsException();
+      throw new AuthenticationException();
     }
 
     user.setDeletedAt(null);

@@ -3,11 +3,11 @@ package dev.ruancmm.gerenciador_tarefas.users;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import dev.ruancmm.gerenciador_tarefas.core.exception.AuthenticationException;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserUpdateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserUpdatePasswordRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.response.UserResponse;
-import dev.ruancmm.gerenciador_tarefas.users.exception.AuthenticationException;
 import dev.ruancmm.gerenciador_tarefas.users.exception.EmailAlreadyExistsException;
 import dev.ruancmm.gerenciador_tarefas.users.exception.PasswordReuseException;
 
