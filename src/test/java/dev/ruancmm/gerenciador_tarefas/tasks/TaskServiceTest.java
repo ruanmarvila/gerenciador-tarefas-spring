@@ -101,7 +101,7 @@ public class TaskServiceTest {
 
         Page<Task> taskPage = new PageImpl<>(List.of(task));
 
-        when(taskRepository.findAll(TaskSpecification.onlyDeleted(any()), eq(pageable)))
+        when(taskRepository.findAllDeletedByUserId(any(), eq(pageable)))
             .thenReturn(taskPage);
 
         Page<TaskResponse> result = taskService.listDeleted(pageable, currentUser.getId());
@@ -109,7 +109,7 @@ public class TaskServiceTest {
         assertEquals(1, result.getTotalElements());
         assertEquals("Deleted Task", result.getContent().get(0).title());
 
-        verify(taskRepository).findAll(TaskSpecification.onlyDeleted(any()), eq(pageable));
+        verify(taskRepository).findAllDeletedByUserId(any(), eq(pageable));
     }
 
     @Test

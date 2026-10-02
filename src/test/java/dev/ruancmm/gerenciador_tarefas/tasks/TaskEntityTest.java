@@ -28,7 +28,7 @@ public class TaskEntityTest {
     @NullAndEmptySource
     @ValueSource(strings = {"   "})
     void shouldUseDefaultTitleWhenTitleIsBlank(String title) {
-        Task task = new Task(new User(), title, "description");
+        Task task = new Task(user, title, "description");
 
         assertEquals("title", task.getTitle());
     }

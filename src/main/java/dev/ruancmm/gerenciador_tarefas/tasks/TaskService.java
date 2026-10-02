@@ -33,7 +33,7 @@ public class TaskService {
     }
 
     public Page<TaskResponse> listDeleted(Pageable pageable, Long userId) {
-        return taskRepository.findAll(TaskSpecification.onlyDeleted(userId), pageable)
+        return taskRepository.findAllDeletedByUserId(userId, pageable)
             .map(TaskResponse::fromEntity);
     }
 

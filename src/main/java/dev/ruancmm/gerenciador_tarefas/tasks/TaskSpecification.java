@@ -14,13 +14,6 @@ public class TaskSpecification {
             .and(hasStatus(filter.status()));
     }
 
-    public static Specification<Task> onlyDeleted(Long userId) {
-        return (root, query, cb) -> cb.and(
-            cb.equal(root.get("user").get("id"), userId),
-            cb.isNotNull(root.get("deletedAt"))
-        );
-    }
-
     private static Specification<Task> hasUserId(Long userId) {
         return (root, query, cb) -> {
             return cb.equal(root.get("user").get("id"), userId);
