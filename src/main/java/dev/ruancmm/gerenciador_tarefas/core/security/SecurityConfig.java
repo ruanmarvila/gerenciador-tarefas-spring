@@ -12,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import dev.ruancmm.gerenciador_tarefas.auth.JwtAuthFilter;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 public class SecurityConfig {
@@ -31,6 +32,10 @@ public class SecurityConfig {
         return http
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint((request, response, authException) -> 
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
+            )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()

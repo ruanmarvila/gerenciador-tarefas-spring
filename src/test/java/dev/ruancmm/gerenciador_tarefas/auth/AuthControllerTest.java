@@ -37,7 +37,7 @@ public class AuthControllerTest {
     private AuthService authService;
 
     @MockitoBean 
-    private JwtUtil jetUtil;
+    private JwtUtil jwtUtil;
 
     @MockitoBean
     private UserRepository userRepository;

@@ -1,7 +1,5 @@
 package dev.ruancmm.gerenciador_tarefas.users;
 
-import java.util.Map;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserUpdateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserUpdatePasswordRequest;
+import dev.ruancmm.gerenciador_tarefas.users.dto.response.MessageResponse;
 import dev.ruancmm.gerenciador_tarefas.users.dto.response.UserResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
@@ -39,16 +38,16 @@ public class UserController {
     }
 
     @PatchMapping("/update/password")
-    public ResponseEntity<Map<String, String>> updatePassword(@RequestBody @Valid UserUpdatePasswordRequest request, @AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<MessageResponse> updatePassword(@RequestBody @Valid UserUpdatePasswordRequest request, @AuthenticationPrincipal User currentUser) {
         userService.updatePassword(request, currentUser);
-        return ResponseEntity.ok(Map.of("message", "password successfully updated"));
+        return ResponseEntity.ok(new MessageResponse("password successfully updated"));
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<?> delete(@AuthenticationPrincipal User currentUser) {
+    public ResponseEntity<MessageResponse> delete(@AuthenticationPrincipal User currentUser) {
         userService.delete(currentUser);
-        return ResponseEntity.noContent().build();
-    }
-
-    
+        return ResponseEntity.ok(new MessageResponse(
+            "Account deletion started. You have 30 days to cancel the deletion"
+        ));
+    } 
 }
