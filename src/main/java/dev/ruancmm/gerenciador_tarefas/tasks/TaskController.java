@@ -20,6 +20,7 @@ import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskUpdateRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.response.TaskResponse;
 import dev.ruancmm.gerenciador_tarefas.users.User;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/tasks")
@@ -51,7 +52,7 @@ public class TaskController {
     @PatchMapping("/update/{id}")
     public ResponseEntity<TaskResponse> update(
         @PathVariable Long id, 
-        @RequestBody TaskUpdateRequest request, 
+        @RequestBody @Valid TaskUpdateRequest request, 
         @AuthenticationPrincipal User user
     ) {
         TaskResponse task = taskService.update(request, id, user);
