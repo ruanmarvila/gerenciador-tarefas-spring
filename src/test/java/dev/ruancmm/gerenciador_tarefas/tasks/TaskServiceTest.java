@@ -113,6 +113,50 @@ public class TaskServiceTest {
     }
 
     @Test
+    void shouldGetTask() {
+        Task task = new Task(currentUser, "Test Task", "...");
+        task.setId(1L);
+        TaskResponse response = new TaskResponse(1L, "Test Task", "...", TaskStatus.TODO);
+
+        when(taskRepository.findById(any()))
+            .thenReturn(Optional.of(task));
+        
+        TaskResponse result = taskService.getById(1L, currentUser);
+
+        assertEquals(response, result);
+
+        verify(taskRepository).findById(any());
+    }
+
+    @Test
+    void shouldRejectWhenTaskNotFound() {
+        when(taskRepository.findById(any()))
+            .thenThrow(new TaskNotFoundException());
+        
+        assertThrows(
+            TaskNotFoundException.class,
+            () -> taskService.getById(1L, currentUser)
+        );
+    }
+
+    @Test
+    void shouldRejectWhenTaskDoesNotBelongCurrentUser() {
+        User otherUser = new User();
+        otherUser.setId(2L);
+
+        Task task = new Task(otherUser, "Test Task", "...");
+        task.setId(1L);
+
+        when(taskRepository.findById(any()))
+            .thenReturn(Optional.of(task));
+        
+        assertThrows(
+            AuthorizationException.class,
+            () -> taskService.getById(1L, currentUser)
+        );
+    }
+
+    @Test
     void shouldUpdateTask() {
         TaskUpdateRequest request = new TaskUpdateRequest(
             "New title", "New description", TaskStatus.DONE

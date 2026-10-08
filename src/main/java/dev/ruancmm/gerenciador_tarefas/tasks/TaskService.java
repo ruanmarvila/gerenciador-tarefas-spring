@@ -37,6 +37,17 @@ public class TaskService {
             .map(TaskResponse::fromEntity);
     }
 
+    public TaskResponse getById(Long id, User currentUser) {
+        Task task = taskRepository.findById(id)
+            .orElseThrow(TaskNotFoundException::new);
+
+        if (task.getUser().getId() != currentUser.getId()) {
+            throw new AuthorizationException();
+        }
+
+        return TaskResponse.fromEntity(task);
+    }
+
     public TaskResponse update(TaskUpdateRequest request, Long id, User currentUser) {
         Task task = taskRepository.findById(id)
             .orElseThrow(TaskNotFoundException::new);

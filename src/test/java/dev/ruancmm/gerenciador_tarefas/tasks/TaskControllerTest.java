@@ -159,6 +159,47 @@ public class TaskControllerTest {
     }
 
     @Test
+    void shouldGetTask() throws Exception {
+        TaskResponse response = new TaskResponse(1L, "Test", "testing", TaskStatus.IN_PROGRESS);
+
+        when(taskService.getById(eq(1L), eq(mockUser)))
+            .thenReturn(response);
+        
+        mockMvc.perform(get("/tasks/{id}", 1L)
+            .with(user(mockUser)))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.title").value("Test"))
+        .andExpect(jsonPath("$.description").value("testing"))
+        .andExpect(jsonPath("$.status").value("IN_PROGRESS"));
+    }
+
+    @Test
+    void shouldReturn403WhenUserIsNotAllowed() throws Exception {
+        doThrow(new AuthorizationException())
+            .when(taskService).getById(eq(1L), eq(mockUser));
+        
+        mockMvc.perform(get("/tasks/{id}", 1L)
+            .with(user(mockUser)))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.status").value(403))
+        .andExpect(jsonPath("$.message").value("You don't have authorization for this operation"))
+        .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
+    void shouldReturn404WhenTaskNotFound() throws Exception {
+        doThrow(new TaskNotFoundException())
+            .when(taskService).getById(eq(1L), eq(mockUser));
+        
+        mockMvc.perform(get("/tasks/{id}", 1L)
+            .with(user(mockUser)))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.status").value(404))
+        .andExpect(jsonPath("$.message").value("Task not found"))
+        .andExpect(jsonPath("$.timestamp").exists());
+    }
+
+    @Test
     void shouldUpdateTask() throws Exception {
         TaskResponse response = new TaskResponse(1L, "New Title", "New Description", TaskStatus.DONE);
 

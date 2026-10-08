@@ -44,6 +44,15 @@ public class TaskController {
         return taskService.list(filter, pageable, user.getId());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<TaskResponse> get(
+        @PathVariable Long id,
+        @AuthenticationPrincipal User user
+    ) {
+        TaskResponse task = taskService.getById(id, user);
+        return ResponseEntity.ok(task);
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<TaskResponse> update(
         @PathVariable Long id, 
