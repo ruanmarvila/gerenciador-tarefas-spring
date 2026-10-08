@@ -49,16 +49,16 @@ http://localhost:8080
 | POST | `/auth/refresh` | Refresh the expired access token|
 | POST | `/auth/restore` | Restore a disabled account (within the recovery window)|
 | GET | `/users/me` | Retrieve the user's information|
-| PATCH | `/users/update` | Update the user's name and e-mail|
-| PATCH | `/users/update/password` | Update the user's password|
-| DELETE | `/users/delete` | Soft-delete the user account|
-| POST | `/tasks/create` | Create a task|
-| GET | `/tasks/list` | List all of the user's tasks|
-| PATCH | `/tasks/update/{task_id}` | Update a task's title, description and status|
-| DELETE | `/tasks/delete/{task_id}` | Soft-delete a task|
+| PATCH | `/users/me` | Update the user's name and e-mail|
+| PATCH | `/users/me/password` | Update the user's password|
+| DELETE | `/users/me` | Soft-delete the user account|
+| POST | `/tasks` | Create a task|
+| GET | `/tasks` | List all of the user's tasks|
+| PATCH | `/tasks/{id}` | Update a task's title, description and status|
+| DELETE | `/tasks/id}` | Soft-delete a task|
 | GET | `/tasks/trash` | List all deleted tasks|
-| PATCH | `/tasks/restore/{task_id}` | Restore a deleted task|
-| DELETE | `/tasks/trash/empty` | Permanently delete all tasks in the trash|
+| PATCH | `/tasks/{id}/restore` | Restore a deleted task|
+| DELETE | `/tasks/trash` | Permanently delete all tasks in the trash|
 
 ---
 
@@ -143,8 +143,29 @@ Each domain owns its own Controller, Service, Repository, entities, DTOs and exc
 │   │       └── application.properties
 │   │
 │   └── test/
-│       └── java/dev/ruancmm/gerenciador_tarefas/
-│           └── GerenciadorTarefasApplicationTests.java
+│       ├── java/dev/ruancmm/gerenciador_tarefas/
+│       │   ├── auth/
+│       │   │   ├── AuthControllerTest.java
+│       │   │   └── AuthServiceTest.java
+│       │   │
+│       │   ├── users/
+│       │   │   ├── UserControllerTest.java
+│       │   │   ├── UserRepositoryTest.java
+│       │   │   └── UserServiceTest.java
+│       │   │
+│       │   ├── tasks/
+│       │   │   ├── TaskControllerTest.java
+│       │   │   ├── TaskEntityTest.java
+│       │   │   ├── TaskRepositoryTest.java
+│       │   │   └── TaskServiceTest.java
+│       │   │
+│       │   ├── core/
+│       │   │   └── SecurityIntegrationTest.java
+│       │   │
+│       │   └── GerenciadorTarefasApplicationTests.java
+│       │
+│       └── resources/
+│           └── application.properties
 │
 ├── pom.xml
 ├── README_BR.md
@@ -241,9 +262,9 @@ POST /auth/register
 - [x] Validation with Bean Validation (DTOs)
 - [x] Global exception handling (`BusinessException` hierarchy)
 - [x] Swagger UI with the Bearer token scheme
-- [ ] Unit tests (services) with JUnit 5 and Mockito
-- [ ] Repository tests (`@DataJpaTest`) and controller tests (`MockMvc`)
-- [ ] Move the JWT secret to configuration, so tokens survive restarts
+- [x] Unit tests (services) with JUnit 5 and Mockito
+- [x] Repository tests (`@DataJpaTest`) and controller tests (`MockMvc`)
+- [x] Move the JWT secret to configuration, so tokens survive restarts
 
 ### 3. Production readiness
 - [ ] Switch H2 to PostgreSQL

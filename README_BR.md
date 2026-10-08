@@ -47,16 +47,16 @@ http://localhost:8080
 | POST | `/auth/refresh` | Renova o *access token* expirado |
 | POST | `/auth/restore`| Restaura uma conta desativada |
 | GET | `/users/me` | Retorna os dados do usuário |
-| PATCH | `/users/update`| Atualiza nome e e-mail |
-| PATCH | `/users/update/password`| Atualiza a senha do usuário |
-| DELETE  | `/users/delete`| *Soft delete* da conta |
-| POST | `/tasks/create` | Cria uma tarefa |
-| GET | `/tasks/list` | Lista todas as tarefas do usuário |
-| PATCH | `/tasks/update/{task_id}` | Atualiza título, descrição e status |
-| DELETE  | `/tasks/delete/{task_id}` | *Soft delete* de uma tarefa |
+| PATCH | `/users/me`| Atualiza nome e e-mail |
+| PATCH | `/users/me/password`| Atualiza a senha do usuário |
+| DELETE  | `/users/me`| *Soft delete* da conta |
+| POST | `/tasks` | Cria uma tarefa |
+| GET | `/tasks` | Lista todas as tarefas do usuário |
+| PATCH | `/tasks/{id}` | Atualiza título, descrição e status |
+| DELETE  | `/tasks/{id}` | *Soft delete* de uma tarefa |
 | GET | `/tasks/trash` | Lista todas as tarefas na lixeira |
-| PATCH | `/tasks/restore/{task_id}`| Restaura uma tarefa da lixeira |
-| DELETE | `/tasks/trash/empty` | Deleta todas as tarefas da lixeira |
+| PATCH | `/tasks/{id}/restore`| Restaura uma tarefa da lixeira |
+| DELETE | `/tasks/trash` | Deleta todas as tarefas da lixeira |
 
 ---
 
@@ -141,8 +141,29 @@ Cada domínio possui seu próprio Controller, Service, Repository, entidades, DT
 │   │       └── application.properties
 │   │
 │   └── test/
-│       └── java/dev/ruancmm/gerenciador_tarefas/
-│           └── GerenciadorTarefasApplicationTests.java
+│       ├── java/dev/ruancmm/gerenciador_tarefas/
+│       │   ├── auth/
+│       │   │   ├── AuthControllerTest.java
+│       │   │   └── AuthServiceTest.java
+│       │   │
+│       │   ├── users/
+│       │   │   ├── UserControllerTest.java
+│       │   │   ├── UserRepositoryTest.java
+│       │   │   └── UserServiceTest.java
+│       │   │
+│       │   ├── tasks/
+│       │   │   ├── TaskControllerTest.java
+│       │   │   ├── TaskEntityTest.java
+│       │   │   ├── TaskRepositoryTest.java
+│       │   │   └── TaskServiceTest.java
+│       │   │
+│       │   ├── core/
+│       │   │   └── SecurityIntegrationTest.java
+│       │   │
+│       │   └── GerenciadorTarefasApplicationTests.java
+│       │
+│       └── resources/
+│           └── application.properties
 │
 ├── pom.xml
 ├── README_BR.md
@@ -239,9 +260,9 @@ POST /auth/register
 - [x] validação com Bean Validation (DTOs)
 - [x] Tratamento global de exceções (`BusinessException`)
 - [x] Swagger UI com o Bearer token
-- [ ] Testes unitários (services) com JUnit 5 e Mockito
-- [ ] Testes de Repository (`@DataJpaTest`) e de Controllers (`@MockMvc`)
-- [ ] Mover as configurações de JWT, para os tokens sobreviverem à reinicialização
+- [x] Testes unitários (services) com JUnit 5 e Mockito
+- [x] Testes de Repository (`@DataJpaTest`) e de Controllers (`@MockMvc`)
+- [x] Mover as configurações de JWT, para os tokens sobreviverem à reinicialização
 
 ### 3. Produção
 - [ ] Trocar H2 para PostgreSQL
@@ -259,4 +280,3 @@ POST /auth/register
 ## Licença:
 
 Este projeto está sob a [licença MIT](LICENSE).
-
