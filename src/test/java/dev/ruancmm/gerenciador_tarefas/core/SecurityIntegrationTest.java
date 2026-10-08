@@ -213,7 +213,7 @@ public class SecurityIntegrationTest {
         JsonNode json = objectMapper.readTree(response);
         String accessToken = json.get("accessToken").asString();
 
-        MvcResult taskResult =mockMvc.perform(post("/tasks/create")
+        MvcResult taskResult =mockMvc.perform(post("/tasks")
             .header("Authorization", "Bearer " + accessToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -256,7 +256,7 @@ public class SecurityIntegrationTest {
         JsonNode json2 = objectMapper.readTree(response2);
         String accessToken2 = json2.get("accessToken").asString();
 
-        mockMvc.perform(patch("/tasks/update/{id}", taskId)
+        mockMvc.perform(patch("/tasks/{id}", taskId)
             .header("Authorization", "Bearer " + accessToken2)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -303,7 +303,7 @@ public class SecurityIntegrationTest {
         JsonNode json = objectMapper.readTree(response);
         String accessToken = json.get("accessToken").asString();
 
-        MvcResult taskResult = mockMvc.perform(post("/tasks/create")
+        MvcResult taskResult = mockMvc.perform(post("/tasks")
             .header("Authorization", "Bearer " + accessToken)
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -346,7 +346,7 @@ public class SecurityIntegrationTest {
         JsonNode json2 = objectMapper.readTree(response2);
         String accessToken2 = json2.get("accessToken").asString();
 
-        mockMvc.perform(delete("/tasks/delete/{id}", taskId)
+        mockMvc.perform(delete("/tasks/{id}", taskId)
             .header("Authorization", "Bearer " + accessToken2))
         .andExpect(status().isForbidden())
         .andExpect(jsonPath("$.status").value(403))

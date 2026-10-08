@@ -66,7 +66,7 @@ public class TaskControllerTest {
         when(taskService.create(any(TaskCreateRequest.class), eq(mockUser)))
             .thenReturn(response);
         
-        mockMvc.perform(post("/tasks/create")
+        mockMvc.perform(post("/tasks")
             .with(user(mockUser))
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -85,7 +85,7 @@ public class TaskControllerTest {
 
     @Test
     void shouldReturn401WhenWithoutAuthentication() throws Exception {
-        mockMvc.perform(post("/tasks/create")
+        mockMvc.perform(post("/tasks")
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
@@ -108,7 +108,7 @@ public class TaskControllerTest {
         when(taskService.list(any(TaskFilterRequest.class), any(Pageable.class), any()))
             .thenReturn(taskResponsePage);
         
-        mockMvc.perform(get("/tasks/list")
+        mockMvc.perform(get("/tasks")
             .param("page", "0")
             .param("size", "10")
             .with(user(mockUser)))
@@ -165,7 +165,7 @@ public class TaskControllerTest {
         when(taskService.update(any(TaskUpdateRequest.class), eq(1L), eq(mockUser)))
             .thenReturn(response);
         
-        mockMvc.perform(patch("/tasks/update/{id}", 1L)
+        mockMvc.perform(patch("/tasks/{id}", 1L)
             .with(user(mockUser))
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -188,7 +188,7 @@ public class TaskControllerTest {
         doThrow(new AuthorizationException())
             .when(taskService).update(any(TaskUpdateRequest.class), eq(1L), eq(mockUser));
 
-        mockMvc.perform(patch("/tasks/update/{id}", 1L)
+        mockMvc.perform(patch("/tasks/{id}", 1L)
             .with(user(mockUser))
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -206,7 +206,7 @@ public class TaskControllerTest {
         doThrow(new TaskNotFoundException())
             .when(taskService).update(any(TaskUpdateRequest.class), eq(1L), eq(mockUser));
 
-        mockMvc.perform(patch("/tasks/update/{id}", 1L)
+        mockMvc.perform(patch("/tasks/{id}", 1L)
             .with(user(mockUser))
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -221,7 +221,7 @@ public class TaskControllerTest {
 
     @Test
     void shouldReturn422WhenUpdateRequestIsNull() throws Exception {
-        mockMvc.perform(patch("/tasks/update/{id}", 1L)
+        mockMvc.perform(patch("/tasks/{id}", 1L)
             .with(user(mockUser))
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -236,7 +236,7 @@ public class TaskControllerTest {
 
     @Test
     void shouldDeleteTask() throws Exception {
-        mockMvc.perform(delete("/tasks/delete/{id}", 1L)
+        mockMvc.perform(delete("/tasks/{id}", 1L)
             .with(user(mockUser)))
         .andExpect(status().isNoContent());
 
@@ -248,7 +248,7 @@ public class TaskControllerTest {
         doThrow(new AuthorizationException())
             .when(taskService).delete(eq(1L), eq(mockUser));
 
-        mockMvc.perform(delete("/tasks/delete/{id}", 1L)
+        mockMvc.perform(delete("/tasks/{id}", 1L)
             .with(user(mockUser)))
         .andExpect(status().isForbidden());
     }
@@ -258,7 +258,7 @@ public class TaskControllerTest {
         doThrow(new TaskNotFoundException())
             .when(taskService).delete(eq(1L), eq(mockUser));
         
-        mockMvc.perform(delete("/tasks/delete/{id}", 1L)
+        mockMvc.perform(delete("/tasks/{id}", 1L)
             .with(user(mockUser)))
         .andExpect(status().isNotFound());
     }
@@ -270,7 +270,7 @@ public class TaskControllerTest {
         when(taskService.restore(eq(1L), eq(mockUser)))
             .thenReturn(response);
         
-        mockMvc.perform(post("/tasks/restore/{id}", 1L)
+        mockMvc.perform(post("/tasks/{id}/restore", 1L)
             .with(user(mockUser)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.title").value("Restored"))
@@ -285,7 +285,7 @@ public class TaskControllerTest {
         doThrow(new AuthorizationException())
             .when(taskService).restore(eq(1L), eq(mockUser));
 
-        mockMvc.perform(post("/tasks/restore/{id}", 1L)
+        mockMvc.perform(post("/tasks/{id}/restore", 1L)
             .with(user(mockUser)))
         .andExpect(status().isForbidden());
     }
@@ -295,14 +295,14 @@ public class TaskControllerTest {
         doThrow(new TaskNotFoundException())
             .when(taskService).restore(eq(1L), eq(mockUser));
 
-        mockMvc.perform(post("/tasks/restore/{id}", 1L)
+        mockMvc.perform(post("/tasks/{id}/restore", 1L)
             .with(user(mockUser)))
         .andExpect(status().isNotFound());
     }
 
     @Test
     void shouldEmptyTrash() throws Exception {
-        mockMvc.perform(delete("/tasks/trash/empty")
+        mockMvc.perform(delete("/tasks/trash")
             .with(user(mockUser)))
         .andExpect(status().isNoContent());
 

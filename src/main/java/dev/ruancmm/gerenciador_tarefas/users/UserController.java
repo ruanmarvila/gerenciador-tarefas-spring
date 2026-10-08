@@ -32,18 +32,18 @@ public class UserController {
         return ResponseEntity.ok(UserResponse.fromEntity(currentUser));
     }
 
-    @PatchMapping("/update")
+    @PatchMapping("/me")
     public ResponseEntity<UserResponse> update(@RequestBody @Valid UserUpdateRequest request,@AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(userService.update(request, currentUser));
     }
 
-    @PatchMapping("/update/password")
+    @PatchMapping("/me/password")
     public ResponseEntity<MessageResponse> updatePassword(@RequestBody @Valid UserUpdatePasswordRequest request, @AuthenticationPrincipal User currentUser) {
         userService.updatePassword(request, currentUser);
         return ResponseEntity.ok(new MessageResponse("password successfully updated"));
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/me")
     public ResponseEntity<MessageResponse> delete(@AuthenticationPrincipal User currentUser) {
         userService.delete(currentUser);
         return ResponseEntity.ok(new MessageResponse(

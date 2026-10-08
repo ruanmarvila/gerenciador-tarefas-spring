@@ -67,7 +67,7 @@ public class UserControllerTest {
         when(userService.update(any(UserUpdateRequest.class), eq(mockUser)))
             .thenReturn(response);
 
-        mockMvc.perform(patch("/users/update")
+        mockMvc.perform(patch("/users/me")
             .with(user(mockUser))
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -85,7 +85,7 @@ public class UserControllerTest {
 
     @Test
     void shouldReturn422WhenUpdateRequestIsNull() throws Exception {
-        mockMvc.perform(patch("/users/update")
+        mockMvc.perform(patch("/users/me")
         .with(user(mockUser))
         .contentType(MediaType.APPLICATION_JSON)
         .content("""
@@ -99,7 +99,7 @@ public class UserControllerTest {
 
     @Test
     void shouldUpdatePassword() throws Exception {
-        mockMvc.perform(patch("/users/update/password")
+        mockMvc.perform(patch("/users/me/password")
             .with(user(mockUser))
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -119,7 +119,7 @@ public class UserControllerTest {
         doThrow(new PasswordReuseException())
             .when(userService).updatePassword(any(UserUpdatePasswordRequest.class), eq(mockUser));
 
-        mockMvc.perform(patch("/users/update/password")
+        mockMvc.perform(patch("/users/me/password")
             .with(user(mockUser))
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
@@ -133,7 +133,7 @@ public class UserControllerTest {
 
     @Test
     void shouldDeleteUser() throws Exception {
-        mockMvc.perform(delete("/users/delete")
+        mockMvc.perform(delete("/users/me")
             .with(user(mockUser)))
         .andExpect(status().isOk())
         .andExpect(jsonPath("message")

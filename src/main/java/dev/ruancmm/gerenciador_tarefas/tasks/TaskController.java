@@ -33,23 +33,18 @@ public class TaskController {
         this.taskService = taskService;
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public ResponseEntity<TaskResponse> create(@RequestBody TaskCreateRequest request, @AuthenticationPrincipal User user) {
         TaskResponse task = taskService.create(request, user);
         return ResponseEntity.status(HttpStatus.CREATED).body(task);
     }
 
-    @GetMapping("/list")
+    @GetMapping
     public Page<TaskResponse> list(TaskFilterRequest filter, Pageable pageable, @AuthenticationPrincipal User user) {
         return taskService.list(filter, pageable, user.getId());
     }
 
-    @GetMapping("/trash")
-    public Page<TaskResponse> trash(Pageable pageable, @AuthenticationPrincipal User user) {
-        return taskService.listDeleted(pageable, user.getId());
-    }
-
-    @PatchMapping("/update/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<TaskResponse> update(
         @PathVariable Long id, 
         @RequestBody @Valid TaskUpdateRequest request, 
@@ -59,19 +54,24 @@ public class TaskController {
         return ResponseEntity.ok(task);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, @AuthenticationPrincipal User user) {
         taskService.delete(id, user);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("restore/{id}")
+    @GetMapping("/trash")
+    public Page<TaskResponse> trash(Pageable pageable, @AuthenticationPrincipal User user) {
+        return taskService.listDeleted(pageable, user.getId());
+    }
+
+    @PostMapping("/{id}/restore")
     public ResponseEntity<TaskResponse> restore(@PathVariable Long id, @AuthenticationPrincipal User user) {
         TaskResponse task = taskService.restore(id, user);
         return ResponseEntity.ok(task);
     }
 
-    @DeleteMapping("/trash/empty")
+    @DeleteMapping("/trash")
     public ResponseEntity<?> emptyTrash(@AuthenticationPrincipal User user) {
         taskService.emptyTrash(user.getId());
         return ResponseEntity.noContent().build();
