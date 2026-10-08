@@ -1,6 +1,5 @@
 package dev.ruancmm.gerenciador_tarefas.users.dto.request;
 
-import dev.ruancmm.gerenciador_tarefas.users.User;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -18,8 +17,4 @@ public record UserCreateRequest(
     @Size(min = 5, message = "Password must contain at least 5 characters")
     String password
 ) {
-
-    public User toEntity() {
-        return new User(name, email, password);
-    }
 }
