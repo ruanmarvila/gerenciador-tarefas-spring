@@ -265,7 +265,7 @@ POST /auth/register
 - [x] Mover as configurações de JWT, para os tokens sobreviverem à reinicialização
 
 ### 3. Produção
-- [ ] Trocar H2 para PostgreSQL
+- [x] Trocar H2 para PostgreSQL
 - [ ] Containerizar a aplicação e o banco com Docker
 - [ ] Deploy
 - [ ] CI/CD pipeline

@@ -5,6 +5,8 @@ target/
 !**/src/test/**/target/
 application-security.properties
 
+.env
+
 ### STS ###
 .apt_generated
 .classpath

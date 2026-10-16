@@ -267,7 +267,7 @@ POST /auth/register
 - [x] Move the JWT secret to configuration, so tokens survive restarts
 
 ### 3. Production readiness
-- [ ] Switch H2 to PostgreSQL
+- [x] Switch H2 to PostgreSQL
 - [ ] Containerize the application and database with Docker
 - [ ] Deploy (short-lived, to get the experience of leaving localhost)
 - [ ] CI/CD pipeline (build and test on every push)
