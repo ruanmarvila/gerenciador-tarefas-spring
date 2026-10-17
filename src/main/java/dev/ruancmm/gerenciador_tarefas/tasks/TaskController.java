@@ -1,7 +1,8 @@
 package dev.ruancmm.gerenciador_tarefas.tasks;
 
-import org.springframework.data.domain.Page;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PagedModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,8 +41,12 @@ public class TaskController {
     }
 
     @GetMapping
-    public Page<TaskResponse> list(TaskFilterRequest filter, Pageable pageable, @AuthenticationPrincipal User user) {
-        return taskService.list(filter, pageable, user.getId());
+    public PagedModel<TaskResponse> list(
+        @ParameterObject TaskFilterRequest filter, 
+        @ParameterObject  Pageable pageable, 
+        @AuthenticationPrincipal User user
+    ) {
+        return new PagedModel<>(taskService.list(filter, pageable, user.getId()));
     }
 
     @GetMapping("/{id}")
@@ -70,8 +75,11 @@ public class TaskController {
     }
 
     @GetMapping("/trash")
-    public Page<TaskResponse> trash(Pageable pageable, @AuthenticationPrincipal User user) {
-        return taskService.listDeleted(pageable, user.getId());
+    public PagedModel<TaskResponse> trash(
+        @ParameterObject Pageable pageable, 
+        @AuthenticationPrincipal User user
+    ) {
+        return new PagedModel<>(taskService.listDeleted(pageable, user.getId()));
     }
 
     @PostMapping("/{id}/restore")

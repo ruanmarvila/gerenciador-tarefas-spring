@@ -119,10 +119,10 @@ public class TaskControllerTest {
         .andExpect(jsonPath("$.content[0].title").value("Study Spring"))
         .andExpect(jsonPath("$.content[0].description").value("Finish tests"))
         .andExpect(jsonPath("$.content[0].status").value("IN_PROGRESS"))
-        .andExpect(jsonPath("$.totalElements").value(1))
-        .andExpect(jsonPath("$.totalPages").value(1))
-        .andExpect(jsonPath("$.size").value(10))
-        .andExpect(jsonPath("$.number").value(0));
+        .andExpect(jsonPath("$.page.totalElements").value(1))
+        .andExpect(jsonPath("$.page.totalPages").value(1))
+        .andExpect(jsonPath("$.page.size").value(10))
+        .andExpect(jsonPath("$.page.number").value(0));
         
         verify(taskService).list(any(TaskFilterRequest.class), any(Pageable.class), any());
     }
@@ -150,10 +150,10 @@ public class TaskControllerTest {
         .andExpect(jsonPath("$.content[0].title").value("Delete Task"))
         .andExpect(jsonPath("$.content[0].description").value("Test delete"))
         .andExpect(jsonPath("$.content[0].status").value("DONE"))
-        .andExpect(jsonPath("$.totalElements").value(1))
-        .andExpect(jsonPath("$.totalPages").value(1))
-        .andExpect(jsonPath("$.size").value(10))
-        .andExpect(jsonPath("$.number").value(0));
+        .andExpect(jsonPath("$.page.totalElements").value(1))
+        .andExpect(jsonPath("$.page.totalPages").value(1))
+        .andExpect(jsonPath("$.page.size").value(10))
+        .andExpect(jsonPath("$.page.number").value(0));
         
         verify(taskService).listDeleted(any(Pageable.class), any());
     }
