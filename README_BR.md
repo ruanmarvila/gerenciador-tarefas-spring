@@ -1,6 +1,6 @@
 # Gerenciador de Tarefas (Spring Boot)
 
-![Java](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen) ![Spring Security](https://img.shields.io/badge/Spring%20Security-JWT-green) ![Licença](https://img.shields.io/badge/license-MIT-lightgrey)
+![Java](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen) ![Spring Security](https://img.shields.io/badge/Spring%20Security-JWT-green) ![CI](https://github.com/ruanmarvila/gerenciador-tarefas-spring/actions/workflows/ci.yaml/badge.svg) ![Licença](https://img.shields.io/badge/license-MIT-lightgrey)
 
 Uma API RESTful para gerenciamento de tarefas desenvolvido em Java com Spring Boot. Esse projeto é uma tradução de um projeto anterior [versão FastAPI](https://github.com/ruanmarvila/gerenciador-tarefas), redesenvolvido para aprender o ecossistema Spring: arquitetura em camadas organizada por domínio, JPA, Spring Security com JWT, migrações de banco, e testes automatizados.
 
@@ -52,6 +52,7 @@ http://localhost:8080
 | DELETE  | `/users/me`| *Soft delete* da conta |
 | POST | `/tasks` | Cria uma tarefa |
 | GET | `/tasks` | Lista todas as tarefas do usuário |
+| GET | `/tasks/{id}` | Lista uma tarefa do usuário |
 | PATCH | `/tasks/{id}` | Atualiza título, descrição e status |
 | DELETE  | `/tasks/{id}` | *Soft delete* de uma tarefa |
 | GET | `/tasks/trash` | Lista todas as tarefas na lixeira |
@@ -74,7 +75,7 @@ http://localhost:8080
 | Bean Validation | Validação de DTO |
 | Flyway | Migração de banco |
 | H2 | Banco de desevolvimento |
-| PostgreSQL | Banco (planejado, veja [Roteiro](#roteiro)) |
+| PostgreSQL | Banco |
 | springdoc-openapi | Swagger UI |
 | JUnit 5 e Mockito | Testes |
 | Maven | Construtor e gerenciador de dependências |
@@ -138,6 +139,7 @@ Cada domínio possui seu próprio Controller, Service, Repository, entidades, DT
 │   │   │
 │   │   └── resources/
 │   │       ├── db/migration/   # Migrações do flyway
+│   │       ├── application-security.properties
 │   │       └── application.properties
 │   │
 │   └── test/
@@ -175,9 +177,11 @@ Cada domínio possui seu próprio Controller, Service, Repository, entidades, DT
 ## Como Executar:
 
 ### Pré-requisitos:
-- Java 25 ou superior instalado na máquina
 
-### Passo a passo:
+- [Git](https://git-scm.com/)
+- [Docker Engine](https://docs.docker.com/engine/) 
+
+### Passo a Passo:
 
 1. **Clone o Repositório:**
 
@@ -187,22 +191,36 @@ Cada domínio possui seu próprio Controller, Service, Repository, entidades, DT
 
 2. **Configure as propriedades da aplicação:**
 
-- Edite `src/main/resources/application.properties` (ou use variáveis de ambiente)
+Crie um arquivo `.env` na raiz do projeto, use `.env.example` como referência.
 
-```properties
-spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
-spring.h2.console.enabled=true
-spring.jpa.hibernate.ddl-auto=validate
-spring.flyway.enabled=true
-```
+Configure as variáveis necessárias, incluindo:
+
+- `DB_NAME`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `JWT_SECRET`
+- Token expiration
 
 3. **Inicie o servidor:**
 
 ```bash
-    ./mvnw spring-boot:run
+docker compose up -d --build
+```
 
-    # Windows:
-    mvnw.cmd spring-boot:run
+O Docker Compose constrói a imagem da aplicação, inicia o PostgreSQL e inicia a aplicação Spring Boot após o banco de dados estar em um estado saudável.
+
+### Comandos úteis:
+
+Ver os *logs* da aplicação:
+
+```bash
+docker compose logs -f app
+```
+
+Parar os serviços:
+
+```bash
+docker compose down
 ```
 
 Flyway roda as migrações automaticamente na inicialização.
@@ -266,9 +284,9 @@ POST /auth/register
 
 ### 3. Produção
 - [x] Trocar H2 para PostgreSQL
-- [ ] Containerizar a aplicação e o banco com Docker
+- [x] Containerizar a aplicação e o banco com Docker
+- [x] CI/CD pipeline
 - [ ] Deploy
-- [ ] CI/CD pipeline
 
 ### Quíça
 - [ ] Limpeza agendada de contas que ultrapassaram a janela de recuperação (`@Scheduled`)

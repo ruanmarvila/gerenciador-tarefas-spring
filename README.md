@@ -1,6 +1,6 @@
 # Task Manager (Spring Boot)
 
-![Java](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen) ![Spring Security](https://img.shields.io/badge/Spring%20Security-JWT-green) ![License](https://img.shields.io/badge/license-MIT-lightgrey)
+![Java](https://img.shields.io/badge/Java-25-orange) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1.1-brightgreen) ![Spring Security](https://img.shields.io/badge/Spring%20Security-JWT-green) ![CI](https://github.com/ruanmarvila/gerenciador-tarefas-spring/actions/workflows/ci.yaml/badge.svg) ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 A RESTful API for task management built with Java and Spring Boot. This project is a translation of an earlier [FastAPI version](https://github.com/ruanmarvila/gerenciador-tarefas), rebuilt to learn the Spring ecosystem: layered architecture organized by domain, JPA, Spring Security with JWT, database migrations, and automated tests.
 
@@ -54,6 +54,7 @@ http://localhost:8080
 | DELETE | `/users/me` | Soft-delete the user account|
 | POST | `/tasks` | Create a task|
 | GET | `/tasks` | List all of the user's tasks|
+| GET | `/tasks/{id}` | List a user's task |
 | PATCH | `/tasks/{id}` | Update a task's title, description and status|
 | DELETE | `/tasks/id}` | Soft-delete a task|
 | GET | `/tasks/trash` | List all deleted tasks|
@@ -76,7 +77,7 @@ http://localhost:8080
 | Bean Validation | DTO validation |
 | Flyway | Database migrations |
 | H2 | Database during development |
-| PostgreSQL | Database (planned, see [Roadmap](#roadmap)) |
+| PostgreSQL | Database |
 | springdoc-openapi | Swagger UI |
 | JUnit 5 and Mockito | Testing |
 | Maven | Build and dependency management |
@@ -140,6 +141,7 @@ Each domain owns its own Controller, Service, Repository, entities, DTOs and exc
 │   │   │
 │   │   └── resources/
 │   │       ├── db/migration/   # Flyway migrations
+│   │       ├── application-security.properties
 │   │       └── application.properties
 │   │
 │   └── test/
@@ -174,40 +176,54 @@ Each domain owns its own Controller, Service, Repository, entities, DTOs and exc
 
 ---
 
-## Installation:
+## Installation
 
-### Prerequisites:
-- Java 25 or later installed on your machine.
+### Prerequisites
 
-### Step by Step:
+- [Git](https://git-scm.com/)
+- [Docker Engine](https://docs.docker.com/engine/) 
 
-1. **Clone the Repository:**
-
-```bash
-    git clone https://github.com/ruanmarvila/gerenciador-tarefas-spring
-```
-
-2. **Configure the application properties:**
-
-- Edit `src/main/resources/application.properties` (or use environment variables):
-
-```properties
-spring.datasource.url=jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
-spring.h2.console.enabled=true
-spring.jpa.hibernate.ddl-auto=validate
-spring.flyway.enabled=true
-```
-
-3. **Start the server:**
+### Step 1: Clone the repository
 
 ```bash
-    ./mvnw spring-boot:run
-
-    # Windows:
-    mvnw.cmd spring-boot:run
+    git clone https://github.com/ruanmarvila/gerenciador-tarefas-spring.git
 ```
 
-Flyway runs the migrations automatically on startup.
+### Step 2: Configure environment variables
+
+Create a `.env` file in the project root, using `.env.example` as a reference.
+
+Configure the required variables, including:
+
+- `DB_NAME`
+- `DB_USERNAME`
+- `DB_PASSWORD`
+- `JWT_SECRET`
+- Token expiration settings
+
+### Step 3: Start the application
+
+```bash
+docker compose up -d --build
+```
+
+Docker Compose builds the application image, starts PostgreSQL, and starts the Spring Boot application after the database becomes healthy.
+
+### Useful commands
+
+View application logs:
+
+```bash
+docker compose logs -f app
+```
+
+Stop the services:
+
+```bash
+docker compose down
+```
+
+Flyway automatically applies database migrations when the application starts.
 
 ---
 
@@ -268,9 +284,9 @@ POST /auth/register
 
 ### 3. Production readiness
 - [x] Switch H2 to PostgreSQL
-- [ ] Containerize the application and database with Docker
+- [x] Containerize the application and database with Docker
+- [x] CI/CD pipeline (build and test on every push)
 - [ ] Deploy (short-lived, to get the experience of leaving localhost)
-- [ ] CI/CD pipeline (build and test on every push)
 
 ### 4. Optional
 - [ ] Scheduled cleanup of accounts past the recovery window (`@Scheduled`)
