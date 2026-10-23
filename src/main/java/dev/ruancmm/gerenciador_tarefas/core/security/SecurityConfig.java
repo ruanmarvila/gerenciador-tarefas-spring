@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/error").permitAll()
             .anyRequest().authenticated())
             .headers(headers -> headers.frameOptions(frame -> frame.disable()))
             .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
