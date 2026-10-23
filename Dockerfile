@@ -13,4 +13,4 @@ WORKDIR /app
 
 COPY --from=builder app/target/gerenciador-tarefas-0.0.1-SNAPSHOT.jar ./app.jar
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=70", "-jar", "app.jar"]

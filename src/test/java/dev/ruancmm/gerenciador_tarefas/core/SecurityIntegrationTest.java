@@ -354,6 +354,13 @@ public class SecurityIntegrationTest {
         .andExpect(jsonPath("$.timestamp").exists());
     }
 
+    @Test
+    void shouldExposeHealthEndpointWithoutAuthentication() throws Exception {
+        mockMvc.perform(get("/actuator/health"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status").value("UP"));
+    }
+
     private String uniqueEmail() {
         return "user-" + UUID.randomUUID() + "@test.com";
     }
