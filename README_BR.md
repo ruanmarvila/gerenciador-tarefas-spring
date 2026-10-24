@@ -56,7 +56,7 @@ http://localhost:8080
 | PATCH | `/tasks/{id}` | Atualiza título, descrição e status |
 | DELETE  | `/tasks/{id}` | *Soft delete* de uma tarefa |
 | GET | `/tasks/trash` | Lista todas as tarefas na lixeira |
-| PATCH | `/tasks/{id}/restore`| Restaura uma tarefa da lixeira |
+| POST | `/tasks/{id}/restore`| Restaura uma tarefa da lixeira |
 | DELETE | `/tasks/trash` | Deleta todas as tarefas da lixeira |
 
 ---

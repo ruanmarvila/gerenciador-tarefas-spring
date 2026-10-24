@@ -11,11 +11,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificationExecutor<Task> {
+
+    Optional<Task> findByIdAndUserId(Long id, Long userId);
+
     @Query(
-        value = "SELECT * FROM tasks WHERE id = :id AND deleted_at IS NOT NULL",
+        value = "SELECT * FROM tasks WHERE id = :id AND user_id = :userId AND deleted_at IS NOT NULL",
         nativeQuery = true
     )
-    Optional<Task> findDeletedById(@Param("id") Long id);
+    Optional<Task> findDeletedByIdAndUserId(@Param("id") Long id, @Param("userId") Long userId);
 
     @Query(
     value = "SELECT * FROM tasks WHERE user_id = :userId AND deleted_at IS NOT NULL",

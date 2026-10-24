@@ -5,7 +5,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import dev.ruancmm.gerenciador_tarefas.core.exception.AuthorizationException;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskFilterRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskUpdateRequest;
@@ -38,23 +37,14 @@ public class TaskService {
     }
 
     public TaskResponse getById(Long id, User currentUser) {
-        Task task = taskRepository.findById(id)
+        return taskRepository.findByIdAndUserId(id, currentUser.getId())
+            .map(TaskResponse::fromEntity)
             .orElseThrow(TaskNotFoundException::new);
-
-        if (task.getUser().getId() != currentUser.getId()) {
-            throw new AuthorizationException();
-        }
-
-        return TaskResponse.fromEntity(task);
     }
 
     public TaskResponse update(TaskUpdateRequest request, Long id, User currentUser) {
-        Task task = taskRepository.findById(id)
+        Task task = taskRepository.findByIdAndUserId(id, currentUser.getId())
             .orElseThrow(TaskNotFoundException::new);
-        
-        if (task.getUser().getId() != currentUser.getId()) {
-            throw new AuthorizationException();
-        }
 
         if (request.title() != null && !request.title().isBlank()) {
             task.setTitle(request.title());
@@ -71,25 +61,18 @@ public class TaskService {
         return TaskResponse.fromEntity(taskRepository.save(task));
     }
 
+    @Transactional
     public TaskResponse restore(Long id, User currentUser) {
-        Task task = taskRepository.findDeletedById(id)
+        Task task = taskRepository.findDeletedByIdAndUserId(id, currentUser.getId())
             .orElseThrow(TaskNotFoundException::new);
-        
-        if (task.getUser().getId() != currentUser.getId()) {
-            throw new AuthorizationException();
-        }
 
         task.setDeletedAt(null);
-        return TaskResponse.fromEntity(taskRepository.save(task));
+        return TaskResponse.fromEntity(task);
     }
 
     public void delete(Long id, User currentUser) {
-        Task task = taskRepository.findById(id)
+        Task task = taskRepository.findByIdAndUserId(id, currentUser.getId())
             .orElseThrow(TaskNotFoundException::new);
-        
-        if (task.getUser().getId() != currentUser.getId()) {
-            throw new AuthorizationException();
-        }
 
         taskRepository.delete(task);
     }

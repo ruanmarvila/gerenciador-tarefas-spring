@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import dev.ruancmm.gerenciador_tarefas.auth.dto.request.RefreshRequest;
 import dev.ruancmm.gerenciador_tarefas.auth.dto.response.AccessTokenResponse;
@@ -67,6 +68,7 @@ public class AuthService {
     return new AccessTokenResponse(jwtUtil.generateAccessToken(userId));
   }
 
+  @Transactional
   public TokenResponse restoreAndLogin(String email, String password) {
     User user = userRepository.findByEmailIncludingDeleted(email).
       orElseThrow(AuthenticationException::new);
@@ -84,7 +86,6 @@ public class AuthService {
     }
 
     user.setDeletedAt(null);
-    userRepository.save(user);
 
     return new TokenResponse(
       jwtUtil.generateAccessToken(user.getId()),

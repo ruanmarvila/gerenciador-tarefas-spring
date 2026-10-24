@@ -29,7 +29,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import dev.ruancmm.gerenciador_tarefas.auth.JwtUtil;
-import dev.ruancmm.gerenciador_tarefas.core.exception.AuthorizationException;
 import dev.ruancmm.gerenciador_tarefas.core.security.SecurityConfig;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskUpdateRequest;
@@ -174,15 +173,15 @@ public class TaskControllerTest {
     }
 
     @Test
-    void shouldReturn403WhenUserIsNotAllowed() throws Exception {
-        doThrow(new AuthorizationException())
+    void shouldReturn404WhenUserIsNotAllowed() throws Exception {
+        doThrow(new TaskNotFoundException())
             .when(taskService).getById(eq(1L), eq(mockUser));
         
         mockMvc.perform(get("/tasks/{id}", 1L)
             .with(user(mockUser)))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.status").value(403))
-        .andExpect(jsonPath("$.message").value("You don't have authorization for this operation"))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.status").value(404))
+        .andExpect(jsonPath("$.message").value("Task not found"))
         .andExpect(jsonPath("$.timestamp").exists());
     }
 
@@ -225,8 +224,8 @@ public class TaskControllerTest {
     }
 
     @Test
-    void shouldReturn403WhenUserIsNotAllowedToUpdateTask() throws Exception {
-        doThrow(new AuthorizationException())
+    void shouldReturn404WhenUserIsNotAllowedToUpdateTask() throws Exception {
+        doThrow(new TaskNotFoundException())
             .when(taskService).update(any(TaskUpdateRequest.class), eq(1L), eq(mockUser));
 
         mockMvc.perform(patch("/tasks/{id}", 1L)
@@ -239,7 +238,7 @@ public class TaskControllerTest {
                     "status": "DONE"
                 }
                 """))
-            .andExpect(status().isForbidden());
+            .andExpect(status().isNotFound());
     }
 
     @Test
@@ -285,13 +284,13 @@ public class TaskControllerTest {
     }
 
     @Test
-    void shouldReturn403WhenUserIsNotAllowedToDeleteTask() throws Exception {
-        doThrow(new AuthorizationException())
+    void shouldReturn404WhenUserIsNotAllowedToDeleteTask() throws Exception {
+        doThrow(new TaskNotFoundException())
             .when(taskService).delete(eq(1L), eq(mockUser));
 
         mockMvc.perform(delete("/tasks/{id}", 1L)
             .with(user(mockUser)))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isNotFound());
     }
 
     @Test
@@ -322,13 +321,13 @@ public class TaskControllerTest {
     }
 
     @Test
-    void shouldReturn403WhenUserIsNotAllowedToRestoreTask() throws Exception {
-        doThrow(new AuthorizationException())
+    void shouldReturn404WhenUserIsNotAllowedToRestoreTask() throws Exception {
+        doThrow(new TaskNotFoundException())
             .when(taskService).restore(eq(1L), eq(mockUser));
 
         mockMvc.perform(post("/tasks/{id}/restore", 1L)
             .with(user(mockUser)))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isNotFound());
     }
 
     @Test

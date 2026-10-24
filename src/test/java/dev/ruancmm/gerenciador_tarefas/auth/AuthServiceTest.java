@@ -214,8 +214,6 @@ public class AuthServiceTest {
         assertNull(user.getDeletedAt());
         assertEquals("access", result.accessToken());
         assertEquals("refresh", result.refreshToken());
-
-        verify(userRepository).save(user);
     }
 
     @Test

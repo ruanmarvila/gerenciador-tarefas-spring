@@ -2,7 +2,6 @@ package dev.ruancmm.gerenciador_tarefas.core;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,7 +23,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest
@@ -40,33 +38,10 @@ public class SecurityIntegrationTest {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    // Token tests
     @Test
     void shouldPermitsAccessToProtegedEndpoint() throws Exception {
-        mockMvc.perform(post("/auth/register")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                    "name": "Test",
-                    "email": "test@test.com",
-                    "password": "testtest"
-                }
-                """))
-            .andExpect(status().isCreated());
-
-        MvcResult result = mockMvc.perform(post("/auth/login")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                    "email": "test@test.com",
-                    "password": "testtest"
-                }
-                """))
-            .andExpect(status().isOk())
-            .andReturn();
-
-        String response = result.getResponse().getContentAsString();
-        JsonNode json = objectMapper.readTree(response);
-        String accessToken = json.get("accessToken").asString();
+        String accessToken = registerAndLogin("Test", "test@test.com", "testtest");
 
         mockMvc.perform(get("/users/me")
             .header("Authorization", "Bearer " + accessToken))
@@ -181,177 +156,93 @@ public class SecurityIntegrationTest {
             .header("Authorization", "Bearer " + accessToken))
         .andExpect(status().isUnauthorized());
     }
+
+    // Task tests
+    @Test
+    void shouldAllowOwnerToDeleteOwnTask() throws Exception {
+        String ownerToken = registerAndLogin("Owner", uniqueEmail(), "ownerPassword");
+        long taskId = createTask(ownerToken, "Owner's task");
+
+        mockMvc.perform(delete("/tasks/{id}", taskId)
+                .header("Authorization", "Bearer " + ownerToken))
+            .andExpect(status().isNoContent());
+    }
     
     @Test
-    void shouldReturn403WhenUserTriesToUpdateAnotherUsersTask() throws Exception {
-        String otherUserEmail = uniqueEmail();
-        String userEmail = uniqueEmail();
-        
-        mockMvc.perform(post("/auth/register")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                    "name": "Other User",
-                    "email": "%s",
-                    "password": "otherPassword"
-                }
-                """.formatted(otherUserEmail)))
-            .andExpect(status().isCreated());
-        
-        MvcResult result = mockMvc.perform(post("/auth/login")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                    "email": "%s",
-                    "password": "otherPassword"
-                }
-                """.formatted(otherUserEmail)))
-            .andExpect(status().isOk())
-            .andReturn();
-        
-        String response = result.getResponse().getContentAsString();
-        JsonNode json = objectMapper.readTree(response);
-        String accessToken = json.get("accessToken").asString();
+    void shouldReturn404WhenUserTriesToDeleteAnotherUsersTask() throws Exception {
+        String ownerToken = registerAndLogin("Owner", uniqueEmail(), "ownerPassword");
+        String intruderToken = registerAndLogin("Intruder", uniqueEmail(), "intruderPassword");
+        long taskId = createTask(ownerToken, "Owner's task");
 
-        MvcResult taskResult =mockMvc.perform(post("/tasks")
-            .header("Authorization", "Bearer " + accessToken)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                    "title": null,
-                    "description": null
-                }
-                """))
-            .andExpect(status().isCreated())
-            .andReturn();
-        
-        JsonNode taskJson = objectMapper.readTree(
-            taskResult.getResponse().getContentAsString()
-        );
-        long taskId = taskJson.get("id").asLong();
-        
-        mockMvc.perform(post("/auth/register")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                    "name": "Current User",
-                    "email": "%s",
-                    "password": "password"
-                }
-                """.formatted(userEmail)))
-            .andExpect(status().isCreated());
-        
-        MvcResult result2 = mockMvc.perform(post("/auth/login")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                    "email": "%s",
-                    "password": "password"
-                }
-                """.formatted(userEmail)))
-            .andExpect(status().isOk())
-            .andReturn();
-        
-        String response2 = result2.getResponse().getContentAsString();
-        JsonNode json2 = objectMapper.readTree(response2);
-        String accessToken2 = json2.get("accessToken").asString();
-
-        mockMvc.perform(patch("/tasks/{id}", taskId)
-            .header("Authorization", "Bearer " + accessToken2)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                    "title": "New Title",
-                    "description": null,
-                    "status": "DONE"
-                }
-                """))
-            .andExpect(status().isForbidden())
-            .andExpect(jsonPath("$.status").value(403))
-            .andExpect(jsonPath("$.message").value("You don't have authorization for this operation"))
+        mockMvc.perform(delete("/tasks/{id}", taskId)
+                .header("Authorization", "Bearer " + intruderToken))
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.status").value(404))
+            .andExpect(jsonPath("$.message").value("Task not found"))
             .andExpect(jsonPath("$.timestamp").exists());
+
+        mockMvc.perform(get("/tasks/{id}", taskId)
+                .header("Authorization", "Bearer " + ownerToken))
+            .andExpect(status().isOk());
     }
 
     @Test
-    void shouldReturn403WhenUserTriesToDeleteAnotherUsersTask() throws Exception {
-        String otherUserEmail = uniqueEmail();
-        String userEmail = uniqueEmail();
-        
-        mockMvc.perform(post("/auth/register")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                    "name": "Other User",
-                    "email": "%s",
-                    "password": "otherPassword"
-                }
-                """.formatted(otherUserEmail)))
-            .andExpect(status().isCreated());
-        
-        MvcResult result = mockMvc.perform(post("/auth/login")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                    "email": "%s",
-                    "password": "otherPassword"
-                }
-                """.formatted(otherUserEmail)))
-            .andExpect(status().isOk())
-            .andReturn();
-        
-        String response = result.getResponse().getContentAsString();
-        JsonNode json = objectMapper.readTree(response);
-        String accessToken = json.get("accessToken").asString();
-
-        MvcResult taskResult = mockMvc.perform(post("/tasks")
-            .header("Authorization", "Bearer " + accessToken)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                    "title": null,
-                    "description": null
-                }
-                """))
-            .andExpect(status().isCreated())
-            .andReturn();
-
-        JsonNode taskJson = objectMapper.readTree(
-            taskResult.getResponse().getContentAsString()
-        );
-        long taskId = taskJson.get("id").asLong();
-        
-        mockMvc.perform(post("/auth/register")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                    "name": "Current User",
-                    "email": "%s",
-                    "password": "password"
-                }
-                """.formatted(userEmail)))
-            .andExpect(status().isCreated());
-        
-        MvcResult result2 = mockMvc.perform(post("/auth/login")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content("""
-                {
-                    "email": "%s",
-                    "password": "password"
-                }
-                """.formatted(userEmail)))
-            .andExpect(status().isOk())
-            .andReturn();
-        
-        String response2 = result2.getResponse().getContentAsString();
-        JsonNode json2 = objectMapper.readTree(response2);
-        String accessToken2 = json2.get("accessToken").asString();
+    void shouldAllowOwnerToRestoreOwnTask() throws Exception {
+        String ownerToken = registerAndLogin("Owner", uniqueEmail(), "ownerPassword");
+        long taskId = createTask(ownerToken, "Owner's Task");
 
         mockMvc.perform(delete("/tasks/{id}", taskId)
-            .header("Authorization", "Bearer " + accessToken2))
-        .andExpect(status().isForbidden())
-        .andExpect(jsonPath("$.status").value(403))
-        .andExpect(jsonPath("$.message").value("You don't have authorization for this operation"))
-        .andExpect(jsonPath("$.timestamp").exists());
+            .header("Authorization", "Bearer " + ownerToken))
+        .andExpect(status().isNoContent());
+
+        mockMvc.perform(post("/tasks/{id}/restore", taskId)
+            .header("Authorization", "Bearer " + ownerToken))
+        .andExpect(status().isOk());
+
+        mockMvc.perform(get("/tasks/{id}", taskId)
+            .header("Authorization", "Bearer " + ownerToken))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.title").value("Owner's Task"))
+        .andExpect(jsonPath("$.description").value("Created by integration test"))
+        .andExpect(jsonPath("$.status").value("TODO"));
+    }
+
+    // User tests
+    @Test
+    void shouldUserRestoreAccount() throws Exception {
+        String userEmail = uniqueEmail();
+        String userToken = registerAndLogin("User", userEmail, "12345");
+
+        mockMvc.perform(delete("/users/me")
+            .header("Authorization", "Bearer " + userToken))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.message")
+            .value("Account deletion started. You have 30 days to cancel the deletion"));
+
+        mockMvc.perform(post("/auth/login")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                    "email": "%s", 
+                    "password": "12345"
+                }
+                """.formatted(userEmail)))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.status").value(403))
+            .andExpect(jsonPath("$.message").value("Account disabled. Please reactivate your account"))
+            .andExpect(jsonPath("$.timestamp").exists());
+        
+        mockMvc.perform(post("/auth/restore")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                    "email": "%s",
+                    "password": "12345"
+                }
+            """.formatted(userEmail)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.accessToken").isNotEmpty())
+            .andExpect(jsonPath("$.refreshToken").isNotEmpty());
     }
 
     @Test
@@ -363,5 +254,49 @@ public class SecurityIntegrationTest {
 
     private String uniqueEmail() {
         return "user-" + UUID.randomUUID() + "@test.com";
+    }
+
+    private String registerAndLogin(String name, String email, String password) throws Exception {
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                        "name": "%s", 
+                        "email": "%s", 
+                        "password": "%s"
+                    }
+                    """.formatted(name, email, password)))
+            .andExpect(status().isCreated());
+
+        MvcResult result = mockMvc.perform(post("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                        "email": "%s", 
+                        "password": "%s"
+                    }
+                    """.formatted(email, password)))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        return objectMapper.readTree(result.getResponse().getContentAsString())
+            .get("accessToken").asString();
+    }
+
+    private long createTask(String token, String title) throws Exception {
+        MvcResult result = mockMvc.perform(post("/tasks")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                    "title": "%s", 
+                    "description": "Created by integration test"
+                }
+                """.formatted(title)))
+            .andExpect(status().isCreated())
+            .andReturn();
+
+        return objectMapper.readTree(result.getResponse().getContentAsString())
+            .get("id").asLong();
     }
 }

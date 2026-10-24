@@ -58,7 +58,7 @@ http://localhost:8080
 | PATCH | `/tasks/{id}` | Update a task's title, description and status|
 | DELETE | `/tasks/id}` | Soft-delete a task|
 | GET | `/tasks/trash` | List all deleted tasks|
-| PATCH | `/tasks/{id}/restore` | Restore a deleted task|
+| POST | `/tasks/{id}/restore` | Restore a deleted task|
 | DELETE | `/tasks/trash` | Permanently delete all tasks in the trash|
 
 ---

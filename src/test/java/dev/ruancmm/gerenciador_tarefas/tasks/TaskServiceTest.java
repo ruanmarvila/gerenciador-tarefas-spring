@@ -30,7 +30,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 
-import dev.ruancmm.gerenciador_tarefas.core.exception.AuthorizationException;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskFilterRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskUpdateRequest;
@@ -118,40 +117,23 @@ public class TaskServiceTest {
         task.setId(1L);
         TaskResponse response = new TaskResponse(1L, "Test Task", "...", TaskStatus.TODO);
 
-        when(taskRepository.findById(any()))
+        when(taskRepository.findByIdAndUserId(any(), any()))
             .thenReturn(Optional.of(task));
         
         TaskResponse result = taskService.getById(1L, currentUser);
 
         assertEquals(response, result);
 
-        verify(taskRepository).findById(any());
+        verify(taskRepository).findByIdAndUserId(any(), any());
     }
 
     @Test
     void shouldRejectWhenTaskNotFound() {
-        when(taskRepository.findById(any()))
+        when(taskRepository.findByIdAndUserId(any(), any()))
             .thenThrow(new TaskNotFoundException());
         
         assertThrows(
             TaskNotFoundException.class,
-            () -> taskService.getById(1L, currentUser)
-        );
-    }
-
-    @Test
-    void shouldRejectWhenTaskDoesNotBelongCurrentUser() {
-        User otherUser = new User();
-        otherUser.setId(2L);
-
-        Task task = new Task(otherUser, "Test Task", "...");
-        task.setId(1L);
-
-        when(taskRepository.findById(any()))
-            .thenReturn(Optional.of(task));
-        
-        assertThrows(
-            AuthorizationException.class,
             () -> taskService.getById(1L, currentUser)
         );
     }
@@ -166,7 +148,7 @@ public class TaskServiceTest {
         Task task = new Task(currentUser, "Old title", "Old description");
         task.setId(1L);
 
-        when(taskRepository.findById(any()))
+        when(taskRepository.findByIdAndUserId(any(), any()))
             .thenReturn(Optional.of(task));
 
         when(taskRepository.save(any(Task.class)))
@@ -193,7 +175,7 @@ public class TaskServiceTest {
         Task task = new Task(currentUser, "Old title", "Old description");
         task.setId(1L);
 
-        when(taskRepository.findById(any()))
+        when(taskRepository.findByIdAndUserId(any(), any()))
             .thenReturn(Optional.of(task));
 
         when(taskRepository.save(any(Task.class)))
@@ -217,7 +199,7 @@ public class TaskServiceTest {
         Task task = new Task(currentUser, "Old title", "Old description");
         task.setId(1L);
 
-        when(taskRepository.findById(any()))
+        when(taskRepository.findByIdAndUserId(any(), any()))
             .thenReturn(Optional.of(task));
 
         when(taskRepository.save(any(Task.class)))
@@ -239,7 +221,7 @@ public class TaskServiceTest {
         Task task = new Task(currentUser, "Old title", "Old description");
         task.setId(1L);
 
-        when(taskRepository.findById(any()))
+        when(taskRepository.findByIdAndUserId(any(), any()))
             .thenReturn(Optional.of(task));
 
         when(taskRepository.save(any(Task.class)))
@@ -257,30 +239,11 @@ public class TaskServiceTest {
     void shouldRejectUpdateWhenTaskNotFound() {
         TaskUpdateRequest request = new TaskUpdateRequest("Title", "Description", TaskStatus.DONE);
 
-        when(taskRepository.findById(any()))
+        when(taskRepository.findByIdAndUserId(any(), any()))
             .thenReturn(Optional.empty());
         
         assertThrows(
             TaskNotFoundException.class,
-            () -> taskService.update(request, 1L, currentUser)
-        );
-    }
-
-    @Test
-    void shouldRejectUpdateWhenTaskDoesNotBelongCurrentUser() {
-        User otherUser = new User();
-        otherUser.setId(2L);
-
-        TaskUpdateRequest request = new TaskUpdateRequest(
-            "New title", "New description", TaskStatus.DONE
-        );
-        Task task = new Task(otherUser, "Old title", "Old description");
-
-        when(taskRepository.findById(any()))
-            .thenReturn(Optional.of(task));
-        
-        assertThrows(
-            AuthorizationException.class,
             () -> taskService.update(request, 1L, currentUser)
         );
     }
@@ -292,24 +255,19 @@ public class TaskServiceTest {
         task.setDeletedAt(LocalDateTime.now());
         TaskResponse response = new TaskResponse(1L, "Restored", "description", TaskStatus.TODO);
 
-        when(taskRepository.findDeletedById(any()))
+        when(taskRepository.findDeletedByIdAndUserId(any(), any()))
             .thenReturn(Optional.of(task));
-        
-        when(taskRepository.save(any(Task.class)))
-            .thenReturn(task);
 
         TaskResponse result = taskService.restore(1L, currentUser);
 
         assertNull(task.getDeletedAt());
         assertEquals(response, result);
-
-        verify(taskRepository).save(any(Task.class));
     }
 
     @Test
     void shouldRejectRestoreWhenTaskNotFound() {
 
-        when(taskRepository.findDeletedById(any()))
+        when(taskRepository.findDeletedByIdAndUserId(any(), any()))
             .thenReturn(Optional.empty());
         
         assertThrows(
@@ -318,29 +276,11 @@ public class TaskServiceTest {
         );
     }
 
-    @Test
-    void shouldRejectRestoreWhenTaskDoesNotBelongCurrentUser() {
-        User otherUser = new User();
-        otherUser.setId(2L);
-
-        Task task = new Task(otherUser, null, null);
-        task.setId(1L);
-        task.setDeletedAt(LocalDateTime.now());
-
-        when(taskRepository.findDeletedById(any()))
-            .thenReturn(Optional.of(task));
-        
-        assertThrows(
-            AuthorizationException.class,
-            () -> taskService.restore(1L, currentUser)
-        );
-    }
-
     @Test 
     void shouldDeleteTask() {
         Task task = new Task(currentUser, null, null);
 
-        when(taskRepository.findById(any()))
+        when(taskRepository.findByIdAndUserId(any(), any()))
             .thenReturn(Optional.of(task));
         
         taskService.delete(1L, currentUser);
@@ -350,27 +290,11 @@ public class TaskServiceTest {
 
     @Test
     void shouldRejectDeleteWhenTaskNotFound() {
-        when(taskRepository.findById(any()))
+        when(taskRepository.findByIdAndUserId(any(), any()))
             .thenReturn(Optional.empty());
         
         assertThrows(
             TaskNotFoundException.class,
-            () -> taskService.delete(1L, currentUser)
-        );
-    }
-
-    @Test
-    void shouldRejectDeleteWhenTaskDoesNotBelongCurrentUser() {
-        User otherUser = new User();
-        otherUser.setId(2L);
-
-        Task task = new Task(otherUser, null, null);
-
-        when(taskRepository.findById(any()))
-            .thenReturn(Optional.of(task));
-        
-        assertThrows(
-            AuthorizationException.class,
             () -> taskService.delete(1L, currentUser)
         );
     }

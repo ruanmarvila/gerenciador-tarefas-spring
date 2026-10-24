@@ -49,7 +49,7 @@ public class TaskRepositoryTest {
 
         taskRepository.save(task);
 
-        Optional<Task> result = taskRepository.findDeletedById(task.getId());
+        Optional<Task> result = taskRepository.findDeletedByIdAndUserId(task.getId(), user.getId());
 
         assertTrue(result.isPresent());
         assertEquals(task.getTitle(), result.get().getTitle());
@@ -57,7 +57,21 @@ public class TaskRepositoryTest {
 
     @Test
     void shouldReturnEmptyWhenTaskDoesNotExist() {
-        Optional<Task> result = taskRepository.findDeletedById(123L);
+        Optional<Task> result = taskRepository.findDeletedByIdAndUserId(123L, 1L);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void shouldReturnEmptyWhenTaskBelongsToAnotherUser() {
+        Task task = new Task(user, null, null);
+        task.setDeletedAt(LocalDateTime.now());
+
+        taskRepository.save(task);
+
+        Optional<Task> result = taskRepository.findDeletedByIdAndUserId(
+            task.getId(), anotherUser.getId()
+        );
 
         assertTrue(result.isEmpty());
     }
@@ -71,7 +85,7 @@ public class TaskRepositoryTest {
 
         taskRepository.deleteAllDeletedByUserId(user.getId());
 
-        Optional<Task> result = taskRepository.findDeletedById(task.getId());
+        Optional<Task> result = taskRepository.findDeletedByIdAndUserId(task.getId(), user.getId());
 
         assertTrue(result.isEmpty());
     }
@@ -85,10 +99,11 @@ public class TaskRepositoryTest {
 
         taskRepository.deleteAllDeletedByUserId(user.getId());
 
-        Optional<Task> result = taskRepository.findDeletedById(task.getId());
+        Optional<Task> result = taskRepository.findDeletedByIdAndUserId(
+            task.getId(), anotherUser.getId()
+        );
 
         assertTrue(result.isPresent());
-        assertEquals(anotherUser.getId(), result.get().getUser().getId());
     }
 
     @Test
