@@ -212,6 +212,7 @@ public class SecurityIntegrationTest {
     void shouldUserRestoreAccount() throws Exception {
         String userEmail = uniqueEmail();
         String userToken = registerAndLogin("User", userEmail, "12345");
+        long taskId = createTask(userToken, "User's Task");
 
         mockMvc.perform(delete("/users/me")
             .header("Authorization", "Bearer " + userToken))
@@ -232,7 +233,7 @@ public class SecurityIntegrationTest {
             .andExpect(jsonPath("$.message").value("Account disabled. Please reactivate your account"))
             .andExpect(jsonPath("$.timestamp").exists());
         
-        mockMvc.perform(post("/auth/restore")
+        MvcResult result = mockMvc.perform(post("/auth/restore")
             .contentType(MediaType.APPLICATION_JSON)
             .content("""
                 {
@@ -242,7 +243,18 @@ public class SecurityIntegrationTest {
             """.formatted(userEmail)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.accessToken").isNotEmpty())
-            .andExpect(jsonPath("$.refreshToken").isNotEmpty());
+            .andExpect(jsonPath("$.refreshToken").isNotEmpty())
+            .andReturn();
+
+            String newAccessToken = objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("accessToken").asString();
+            
+            mockMvc.perform(get("/tasks/{id}", taskId)
+                .header("Authorization", "Bearer " + newAccessToken))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.title").value("User's Task"))
+            .andExpect(jsonPath("$.description").value("Created by integration test"))
+            .andExpect(jsonPath("$.status").value("TODO"));
     }
 
     @Test
