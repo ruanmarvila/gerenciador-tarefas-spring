@@ -35,4 +35,27 @@ public class UserRepositoryTest {
 
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    void shouldDeleteExpiredAccounts() {
+        User user = new User("Test", "test@test.com", "testtest");
+        user.setDeletedAt(LocalDateTime.now().minusDays(31));
+
+        userRepository.save(user);
+
+        LocalDateTime limit = LocalDateTime.now().minusDays(30);
+
+        int result = userRepository.deleteExpired(limit);
+
+        assertTrue(result >  0);
+    }
+
+    @Test 
+    void shouldReturnZeroWhenNoExpiredAccountsExist() {
+        LocalDateTime limit = LocalDateTime.now().minusDays(30);
+
+        int result = userRepository.deleteExpired(limit);
+
+        assertTrue(result == 0);
+    }
 }

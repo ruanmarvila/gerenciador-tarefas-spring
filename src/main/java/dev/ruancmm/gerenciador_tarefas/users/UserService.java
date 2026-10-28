@@ -1,7 +1,10 @@
 package dev.ruancmm.gerenciador_tarefas.users;
 
+import java.time.LocalDateTime;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import dev.ruancmm.gerenciador_tarefas.core.exception.AuthenticationException;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserCreateRequest;
@@ -62,4 +65,9 @@ public class UserService {
         userRepository.delete(currentUser);
     }
 
+    @Transactional
+    int purgeExpiredAccounts() {
+        LocalDateTime limit = LocalDateTime.now().minusDays(30);
+        return userRepository.deleteExpired(limit);
+    }
 }

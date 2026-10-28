@@ -286,10 +286,10 @@ POST /auth/register
 - [x] Trocar H2 para PostgreSQL
 - [x] Containerizar a aplicação e o banco com Docker
 - [x] CI/CD pipeline
-- [ ] Deploy
+- [x] Deploy
 
 ### Quíça
-- [ ] Limpeza agendada de contas que ultrapassaram a janela de recuperação (`@Scheduled`)
+- [x] Limpeza agendada de contas que ultrapassaram a janela de recuperação (`@Scheduled`)
 - [ ] HTML/CSS/JS para um front-end simples (login e registro) consumindo a API, incluindo configuração de CORS
 - [ ] AOP
 

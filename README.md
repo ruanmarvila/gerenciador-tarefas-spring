@@ -286,10 +286,10 @@ POST /auth/register
 - [x] Switch H2 to PostgreSQL
 - [x] Containerize the application and database with Docker
 - [x] CI/CD pipeline (build and test on every push)
-- [ ] Deploy (short-lived, to get the experience of leaving localhost)
+- [x] Deploy (short-lived, to get the experience of leaving localhost)
 
 ### 4. Optional
-- [ ] Scheduled cleanup of accounts past the recovery window (`@Scheduled`)
+- [x] Scheduled cleanup of accounts past the recovery window (`@Scheduled`)
 - [ ] Simple HTML/CSS/JS front-end (login and register) consuming the API, including CORS configuration
 - [ ] AOP (logging or auditing as a study exercise)
 

@@ -1,5 +1,7 @@
 package dev.ruancmm.gerenciador_tarefas.users;
 
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -218,5 +220,19 @@ public class UserServiceTest {
         userService.delete(currentUser);
 
         verify(userRepository).delete(currentUser);
+    }
+
+    @Test
+    void shouldPurgeExpiredAccounts() {
+        int response = 1;
+
+        when(userRepository.deleteExpired(any(LocalDateTime.class)))
+            .thenReturn(response);
+
+        int result = userService.purgeExpiredAccounts();
+
+        assertEquals(response, result);
+
+        verify(userRepository).deleteExpired(any(LocalDateTime.class));
     }
 }
