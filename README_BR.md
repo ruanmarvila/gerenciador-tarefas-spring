@@ -8,7 +8,7 @@ Uma API RESTful para gerenciamento de tarefas desenvolvido em Java com Spring Bo
 
 # Índice:
 
-- [Metas](#metas)
+- [O que Aprendi](#o-que-aprendi)
 - [Funcionalidades](#funcionalidade)
 - [Tecnologias](#tecnologias)
 - [Arquitetura](#arquitetura)
@@ -20,16 +20,14 @@ Uma API RESTful para gerenciamento de tarefas desenvolvido em Java com Spring Bo
 
 ---
 
-## Metas:
-
-Essa seção vai tornar-se "O que Aprendi" uma vez que o projeto termine.
+## O que Aprendi:
 
 - Estruturar uma arquitetura em camadas organizada por domínios (`auth/`, `users/`, `tasks/`);
 - Usar as camadas de Controller, Service e Repository com a injeção de dependência do Spring;
 - Implementar autenticação JWT (tokens de acesso e de renovação);
 - Modelar dados relacionais com JPA/HIbernate e versionar com Flyway;
 - Escrever testes unitários e de integração com JUnit 5 e Mockito;
--  Levar o projeto além do localhost: PostgreSQL, Docker, deploy e CI/CD.
+- Levar o projeto além do localhost: PostgreSQL, Docker, deploy e CI/CD.
 
 ---
 
@@ -161,6 +159,9 @@ Cada domínio possui seu próprio Controller, Service, Repository, entidades, DT
 │       │   │
 │       │   ├── core/
 │       │   │   └── SecurityIntegrationTest.java
+│       │   │
+│       │   ├── config/
+│       │   │   └── PostgresContainerConfig.java
 │       │   │
 │       │   └── GerenciadorTarefasApplicationTests.java
 │       │

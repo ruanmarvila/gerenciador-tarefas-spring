@@ -10,7 +10,7 @@ A RESTful API for task management built with Java and Spring Boot. This project 
 
 # Contents:
 
-- [Goals](#goals)
+- [What I Learned](#what-i-learned)
 - [Features](#features)
 - [Technologies](#technologies)
 - [Architecture](#architecture)
@@ -22,9 +22,7 @@ A RESTful API for task management built with Java and Spring Boot. This project 
 
 ---
 
-## Goals:
-
-This section becomes "What I Learned" once the project is finished.
+## What I Learned:
 
 - Build a layered architecture organized by domain (`auth/`, `users/`, `tasks/`);
 - Apply the Controller, Service and Repository layers with Spring's dependency injection;
@@ -163,6 +161,9 @@ Each domain owns its own Controller, Service, Repository, entities, DTOs and exc
 │       │   │
 │       │   ├── core/
 │       │   │   └── SecurityIntegrationTest.java
+│       │   │
+│       │   ├── config/
+│       │   │   └── PostgresContainerConfig.java
 │       │   │
 │       │   └── GerenciadorTarefasApplicationTests.java
 │       │
