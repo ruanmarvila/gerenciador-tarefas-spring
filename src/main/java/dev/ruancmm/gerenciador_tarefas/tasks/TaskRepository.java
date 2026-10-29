@@ -21,13 +21,13 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
     Optional<Task> findDeletedByIdAndUserId(@Param("id") Long id, @Param("userId") Long userId);
 
     @Query(
-    value = "SELECT * FROM tasks WHERE user_id = :userId AND deleted_at IS NOT NULL",
+    value = "SELECT * FROM tasks WHERE user_id = :userId AND deleted_at IS NOT NULL ORDER BY deleted_at DESC, id DESC",
     countQuery = "SELECT COUNT(*) FROM tasks WHERE user_id = :userId AND deleted_at IS NOT NULL",
     nativeQuery = true
     )
     Page<Task> findAllDeletedByUserId(@Param("userId") Long userId, Pageable pageable);
 
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(
         value = "DELETE FROM tasks WHERE user_id = :userId AND deleted_at IS NOT NULL",
         nativeQuery = true

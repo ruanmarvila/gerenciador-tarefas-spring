@@ -16,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "SELECT * FROM users WHERE email = :email", nativeQuery = true)
     Optional<User> findByEmailIncludingDeleted(@Param("email") String email);
 
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(value = "DELETE FROM users WHERE deleted_at < :limit", nativeQuery = true)
     int deleteExpired(@Param("limit") LocalDateTime limit);
 }

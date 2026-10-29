@@ -288,10 +288,9 @@ POST /auth/register
 - [x] CI/CD pipeline (build and test on every push)
 - [x] Deploy (short-lived, to get the experience of leaving localhost)
 
-### 4. Optional
+### 4. Next steps
 - [x] Scheduled cleanup of accounts past the recovery window (`@Scheduled`)
-- [ ] Simple HTML/CSS/JS front-end (login and register) consuming the API, including CORS configuration
-- [ ] AOP (logging or auditing as a study exercise)
+- [x] Integration tests against PostgreSQL with Testcontainers (native queries and Flyway migrations)
 
 ---
 

@@ -288,10 +288,9 @@ POST /auth/register
 - [x] CI/CD pipeline
 - [x] Deploy
 
-### Quíça
+### Próximos passos
 - [x] Limpeza agendada de contas que ultrapassaram a janela de recuperação (`@Scheduled`)
-- [ ] HTML/CSS/JS para um front-end simples (login e registro) consumindo a API, incluindo configuração de CORS
-- [ ] AOP
+- [x] Testes de integração com PostgreSQL via Testcontainers (queries nativas e migrations do Flyway)
 
 ---
 

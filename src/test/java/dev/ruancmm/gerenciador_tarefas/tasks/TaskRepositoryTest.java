@@ -1,6 +1,7 @@
 package dev.ruancmm.gerenciador_tarefas.tasks;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDateTime;
@@ -11,15 +12,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
+import dev.ruancmm.gerenciador_tarefas.config.PostgresContainerConfig;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskFilterRequest;
 import dev.ruancmm.gerenciador_tarefas.users.User;
 import dev.ruancmm.gerenciador_tarefas.users.UserRepository;
+import jakarta.persistence.EntityManager;
 
 @DataJpaTest
+@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Import(PostgresContainerConfig.class)
 public class TaskRepositoryTest {
 
     @Autowired
@@ -27,6 +34,9 @@ public class TaskRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private EntityManager em;
 
     private User user;
     private User anotherUser;
@@ -44,15 +54,18 @@ public class TaskRepositoryTest {
 
     @Test
     void shouldFindDeletedTaskById() {
-        Task task = new Task(user, null, null);
+        Task task = new Task(user, "Study", "Spring Data");
         task.setDeletedAt(LocalDateTime.now());
-
         taskRepository.save(task);
+        em.flush();
+        em.clear();
 
         Optional<Task> result = taskRepository.findDeletedByIdAndUserId(task.getId(), user.getId());
 
         assertTrue(result.isPresent());
-        assertEquals(task.getTitle(), result.get().getTitle());
+        assertEquals("Study", result.get().getTitle());
+        assertEquals("Spring Data", result.get().getDescription());
+        assertNotNull(result.get().getDeletedAt());
     }
 
     @Test
@@ -108,16 +121,26 @@ public class TaskRepositoryTest {
 
     @Test
     void shouldNotDeleteActiveTasks() {
-        Task task = new Task(user, null, null);
-
-        taskRepository.save(task);
+        Task task = taskRepository.save(new Task(user, "Active", null));
+        em.flush();
 
         taskRepository.deleteAllDeletedByUserId(user.getId());
+        em.clear();
 
-        Optional<Task> result = taskRepository.findById(task.getId());
+        assertTrue(taskRepository.findById(task.getId()).isPresent());
+    }
 
-        assertTrue(result.isPresent());
-        assertEquals(user.getId(), result.get().getUser().getId());
+    @Test
+    void shouldSoftDeleteInsteadOfRemovingTheRow() {
+        Task task = taskRepository.save(new Task(user, "To delete", null));
+        em.flush();
+
+        taskRepository.delete(task);
+        em.flush();
+        em.clear();
+
+        assertTrue(taskRepository.findById(task.getId()).isEmpty());
+        assertTrue(taskRepository.findDeletedByIdAndUserId(task.getId(), user.getId()).isPresent());
     }
 
     @Test
@@ -144,10 +167,10 @@ public class TaskRepositoryTest {
 
         TaskFilterRequest filter = new TaskFilterRequest("Jav", null, null);
 
-        List<Task> reusult = taskRepository.findAll(TaskSpecification.withFilter(filter, user.getId()));
+        List<Task> result = taskRepository.findAll(TaskSpecification.withFilter(filter, user.getId()));
 
-        assertEquals(1, reusult.size());
-        assertEquals(task1.getTitle(), reusult.get(0).getTitle());
+        assertEquals(1, result.size());
+        assertEquals(task1.getTitle(), result.get(0).getTitle());
     }
 
     @Test
@@ -159,10 +182,10 @@ public class TaskRepositoryTest {
 
         TaskFilterRequest filter = new TaskFilterRequest(null, "Korea", null);
 
-        List<Task> reusult = taskRepository.findAll(TaskSpecification.withFilter(filter, user.getId()));
+        List<Task> result = taskRepository.findAll(TaskSpecification.withFilter(filter, user.getId()));
 
-        assertEquals(1, reusult.size());
-        assertEquals(task1.getDescription(), reusult.get(0).getDescription());
+        assertEquals(1, result.size());
+        assertEquals(task1.getDescription(), result.get(0).getDescription());
     }
 
     @Test
@@ -176,10 +199,26 @@ public class TaskRepositoryTest {
 
         TaskFilterRequest filter = new TaskFilterRequest(null, null, TaskStatus.DONE);
 
-        List<Task> reusult = taskRepository.findAll(TaskSpecification.withFilter(filter, user.getId()));
+        List<Task> result = taskRepository.findAll(TaskSpecification.withFilter(filter, user.getId()));
 
-        assertEquals(1, reusult.size());
-        assertEquals(task2.getStatus(), reusult.get(0).getStatus());
+        assertEquals(1, result.size());
+        assertEquals(task2.getStatus(), result.get(0).getStatus());
+    }
+
+    @Test
+    void shouldNotReturnDeletedTasksInFilteredSearch() {
+        Task active = new Task(user, "Active", null);
+        Task deleted = new Task(user, "Deleted", null);
+        deleted.setDeletedAt(LocalDateTime.now());
+        taskRepository.saveAll(List.of(active, deleted));
+        em.flush();
+        em.clear();
+
+        List<Task> result = taskRepository.findAll(
+            TaskSpecification.withFilter(new TaskFilterRequest(null, null, null), user.getId()));
+
+        assertEquals(1, result.size());
+        assertEquals("Active", result.get(0).getTitle());
     }
 
     @Test 
