@@ -2,6 +2,7 @@ package dev.ruancmm.gerenciador_tarefas.core.exception;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,5 +28,15 @@ public class GlobalExceptionHandler {
             ex.getAllErrors().get(0).getDefaultMessage()
         );
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_CONTENT).body(exception);
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<ErrorResponse> handlerInvalidSort(PropertyReferenceException ex) {
+        ErrorResponse exception = new ErrorResponse(
+            LocalDateTime.now(),
+            HttpStatus.BAD_REQUEST.value(),
+            ex.getPropertyName()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exception);
     }
 }
