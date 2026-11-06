@@ -46,6 +46,7 @@ http://localhost:8080
 | POST | `/auth/login` | Authenticate and receive access and refresh tokens
 | POST | `/auth/refresh` | Refresh the expired access token|
 | POST | `/auth/restore` | Restore a disabled account (within the recovery window)|
+| POST | `/auth/logout` | Revoke current refresh token|
 | GET | `/users/me` | Retrieve the user's information|
 | PATCH | `/users/me` | Update the user's name and e-mail|
 | PATCH | `/users/me/password` | Update the user's password|
@@ -54,7 +55,7 @@ http://localhost:8080
 | GET | `/tasks` | List all of the user's tasks|
 | GET | `/tasks/{id}` | List a user's task |
 | PATCH | `/tasks/{id}` | Update a task's title, description and status|
-| DELETE | `/tasks/id}` | Soft-delete a task|
+| DELETE | `/tasks/{id}` | Soft-delete a task|
 | GET | `/tasks/trash` | List all deleted tasks|
 | POST | `/tasks/{id}/restore` | Restore a deleted task|
 | DELETE | `/tasks/trash` | Permanently delete all tasks in the trash|
@@ -109,6 +110,12 @@ Each domain owns its own Controller, Service, Repository, entities, DTOs and exc
 │   │   │   │   ├── CustomUserDetailsService.java
 │   │   │   │   ├── JwtAuthFilter.java
 │   │   │   │   ├── JwtUtil.java
+│   │   │   │   ├── RefreshToken.java
+│   │   │   │   ├── RefreshTokenService.java
+│   │   │   │   ├── RefreshTokenRepository.java
+│   │   │   │   ├── RefreshTokenCleanupJob.java
+│   │   │   │   ├── RotationResult.java
+│   │   │   │   ├── TokenHasher.java
 │   │   │   │   ├── exception/
 │   │   │   │   └── dto/
 │   │   │   │
@@ -117,6 +124,7 @@ Each domain owns its own Controller, Service, Repository, entities, DTOs and exc
 │   │   │   │   ├── UserController.java
 │   │   │   │   ├── UserService.java
 │   │   │   │   ├── UserRepository.java
+│   │   │   │   ├── AccountCleanupJob.java
 │   │   │   │   ├── exception/
 │   │   │   │   └── dto/
 │   │   │   │
@@ -146,7 +154,9 @@ Each domain owns its own Controller, Service, Repository, entities, DTOs and exc
 │       ├── java/dev/ruancmm/gerenciador_tarefas/
 │       │   ├── auth/
 │       │   │   ├── AuthControllerTest.java
-│       │   │   └── AuthServiceTest.java
+│       │   │   ├── AuthServiceTest.java
+│       │   │   ├── RefreshTokenServiceTest.java
+│       │   │   └── RefreshTokenRepositoryTest.java
 │       │   │
 │       │   ├── users/
 │       │   │   ├── UserControllerTest.java
@@ -292,6 +302,7 @@ POST /auth/register
 ### 4. Next steps
 - [x] Scheduled cleanup of accounts past the recovery window (`@Scheduled`)
 - [x] Integration tests against PostgreSQL with Testcontainers (native queries and Flyway migrations)
+- [x] Refresh token rotation
 
 ---
 

@@ -44,6 +44,7 @@ http://localhost:8080
 | POST | `/auth/login` | Autenticação e receber tokens de acesso e renovação|
 | POST | `/auth/refresh` | Renova o *access token* expirado |
 | POST | `/auth/restore`| Restaura uma conta desativada |
+| POST | `/auth/logout`| Revoga o *refresh token* atual |
 | GET | `/users/me` | Retorna os dados do usuário |
 | PATCH | `/users/me`| Atualiza nome e e-mail |
 | PATCH | `/users/me/password`| Atualiza a senha do usuário |
@@ -107,6 +108,12 @@ Cada domínio possui seu próprio Controller, Service, Repository, entidades, DT
 │   │   │   │   ├── CustomUserDetailsService.java
 │   │   │   │   ├── JwtAuthFilter.java
 │   │   │   │   ├── JwtUtil.java
+│   │   │   │   ├── RefreshToken.java
+│   │   │   │   ├── RefreshTokenService.java
+│   │   │   │   ├── RefreshTokenRepository.java
+│   │   │   │   ├── RefreshTokenCleanupJob.java
+│   │   │   │   ├── RotationResult.java
+│   │   │   │   ├── TokenHasher.java
 │   │   │   │   ├── exception/
 │   │   │   │   └── dto/
 │   │   │   │
@@ -115,6 +122,7 @@ Cada domínio possui seu próprio Controller, Service, Repository, entidades, DT
 │   │   │   │   ├── UserController.java
 │   │   │   │   ├── UserService.java
 │   │   │   │   ├── UserRepository.java
+│   │   │   │   ├── AccountCleanupJob.java
 │   │   │   │   ├── exception/
 │   │   │   │   └── dto/
 │   │   │   │
@@ -144,7 +152,9 @@ Cada domínio possui seu próprio Controller, Service, Repository, entidades, DT
 │       ├── java/dev/ruancmm/gerenciador_tarefas/
 │       │   ├── auth/
 │       │   │   ├── AuthControllerTest.java
-│       │   │   └── AuthServiceTest.java
+│       │   │   ├── AuthServiceTest.java
+│       │   │   ├── RefreshTokenServiceTest.java
+│       │   │   └── RefreshTokenRepositoryTest.java
 │       │   │
 │       │   ├── users/
 │       │   │   ├── UserControllerTest.java
@@ -292,6 +302,7 @@ POST /auth/register
 ### Próximos passos
 - [x] Limpeza agendada de contas que ultrapassaram a janela de recuperação (`@Scheduled`)
 - [x] Testes de integração com PostgreSQL via Testcontainers (queries nativas e migrations do Flyway)
+- [x] Rotação de *refresh token*
 
 ---
 
