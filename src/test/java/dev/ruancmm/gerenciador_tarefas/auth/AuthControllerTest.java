@@ -15,8 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import dev.ruancmm.gerenciador_tarefas.auth.dto.request.RefreshRequest;
-import dev.ruancmm.gerenciador_tarefas.auth.dto.response.AccessTokenResponse;
+import dev.ruancmm.gerenciador_tarefas.auth.dto.request.RefreshTokenRequest;
 import dev.ruancmm.gerenciador_tarefas.auth.dto.response.TokenResponse;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountAlreadyActivateException;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountDisabledException;
@@ -134,10 +133,10 @@ public class AuthControllerTest {
     }
 
     @Test
-    void shouldRefreshAndReturnAccessToken() throws Exception {
-        AccessTokenResponse response = new AccessTokenResponse("access-token");
+    void shouldRefreshAndReturnTokens() throws Exception {
+        TokenResponse response = new TokenResponse("access-token", "refresh-token");
 
-        when(authService.refresh(any(RefreshRequest.class)))
+        when(authService.refresh(any(RefreshTokenRequest.class)))
             .thenReturn(response);
         
         mockMvc.perform(post("/auth/refresh")
@@ -150,7 +149,7 @@ public class AuthControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.accessToken").value("access-token"));
         
-        verify(authService).refresh(any(RefreshRequest.class));
+        verify(authService).refresh(any(RefreshTokenRequest.class));
     }
 
     @Test
@@ -207,4 +206,15 @@ public class AuthControllerTest {
             .andExpect(status().isConflict());
     }
 
+    @Test
+    void shouldLogoutAndReturnNoContent() throws Exception {
+        mockMvc.perform(post("/auth/logout")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("""
+                {
+                    "refreshToken": "refresh-token"
+                }
+                """))
+            .andExpect(status().isNoContent());
+    }
 }

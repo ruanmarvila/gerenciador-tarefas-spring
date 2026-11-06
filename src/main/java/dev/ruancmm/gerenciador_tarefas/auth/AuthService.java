@@ -12,11 +12,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import dev.ruancmm.gerenciador_tarefas.auth.dto.request.RefreshRequest;
-import dev.ruancmm.gerenciador_tarefas.auth.dto.response.AccessTokenResponse;
+import dev.ruancmm.gerenciador_tarefas.auth.dto.request.RefreshTokenRequest;
 import dev.ruancmm.gerenciador_tarefas.auth.dto.response.TokenResponse;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountAlreadyActivateException;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountDisabledException;
+import dev.ruancmm.gerenciador_tarefas.auth.exception.InvalidTokenException;
 import dev.ruancmm.gerenciador_tarefas.core.exception.AuthenticationException;
 import dev.ruancmm.gerenciador_tarefas.users.User;
 import dev.ruancmm.gerenciador_tarefas.users.UserRepository;
@@ -32,13 +32,15 @@ public class AuthService {
   private final UserService userService;
   private final PasswordEncoder passwordEncoder;
   private final JwtUtil jwtUtil;
+  private final RefreshTokenService refreshTokenService;
 	
-  public AuthService(AuthenticationManager authenticationManager, UserRepository userRepository, UserService userService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+  public AuthService(AuthenticationManager authenticationManager, UserRepository userRepository, UserService userService, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, RefreshTokenService refreshTokenService) {
       this.authenticationManager = authenticationManager;
       this.userRepository = userRepository;
       this.userService = userService;
       this.passwordEncoder = passwordEncoder;
       this.jwtUtil = jwtUtil;
+      this.refreshTokenService = refreshTokenService;
 	}
 
   public UserResponse register(UserCreateRequest request) {
@@ -55,7 +57,7 @@ public class AuthService {
   
       return new TokenResponse(
         jwtUtil.generateAccessToken(user.getId()),
-        jwtUtil.generateRefreshToken(user.getId())
+        refreshTokenService.issueForNewSession(user.getId())
       );
     } catch (BadCredentialsException | UsernameNotFoundException e) {
       verifyPendingRestore(email, password);
@@ -63,9 +65,13 @@ public class AuthService {
     }
   }
 
-  public AccessTokenResponse refresh(RefreshRequest request) {
-    Long userId = jwtUtil.extractUserId(request.refreshToken(), "refresh");
-    return new AccessTokenResponse(jwtUtil.generateAccessToken(userId));
+  public TokenResponse refresh(RefreshTokenRequest request) {
+    return switch (refreshTokenService.rotate(request.refreshToken())) {
+      case RotationResult.Rotated r -> new TokenResponse(
+        jwtUtil.generateAccessToken(r.userId()), r.newRawToken()
+      );
+      case RotationResult.Rejected r -> throw new InvalidTokenException("Invalid token");
+    };
   }
 
   @Transactional
@@ -89,8 +95,12 @@ public class AuthService {
 
     return new TokenResponse(
       jwtUtil.generateAccessToken(user.getId()),
-      jwtUtil.generateRefreshToken(user.getId())
+      refreshTokenService.issueForNewSession(user.getId())
     );
+  }
+
+  public void logout(RefreshTokenRequest request) {
+    refreshTokenService.revoke(request.refreshToken());
   }
   
   private void verifyPendingRestore(String email, String password) {

@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.ruancmm.gerenciador_tarefas.auth.RefreshTokenService;
 import dev.ruancmm.gerenciador_tarefas.core.exception.AuthenticationException;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserUpdateRequest;
@@ -19,10 +20,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenService refreshService;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, RefreshTokenService refreshService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.refreshService = refreshService;
     }
 
     public UserResponse create(UserCreateRequest request) {
@@ -47,6 +50,7 @@ public class UserService {
         return UserResponse.fromEntity(userRepository.save(currentUser));
     }
 
+    @Transactional
     public void updatePassword(UserUpdatePasswordRequest request, User currentUser) {
         if (request.password().equals(request.newPassword())) {
             throw new PasswordReuseException();
@@ -59,10 +63,14 @@ public class UserService {
         String newHashedPassword = passwordEncoder.encode(request.newPassword());
         currentUser.setPassword(newHashedPassword);
         userRepository.save(currentUser);
+
+        refreshService.revokeAllForUser(currentUser.getId());
     }
 
+    @Transactional
     public void delete(User currentUser) {
         userRepository.delete(currentUser);
+        refreshService.revokeAllForUser(currentUser.getId());
     }
 
     @Transactional

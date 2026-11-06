@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.ruancmm.gerenciador_tarefas.auth.dto.request.LoginRequest;
-import dev.ruancmm.gerenciador_tarefas.auth.dto.request.RefreshRequest;
-import dev.ruancmm.gerenciador_tarefas.auth.dto.response.AccessTokenResponse;
+import dev.ruancmm.gerenciador_tarefas.auth.dto.request.RefreshTokenRequest;
 import dev.ruancmm.gerenciador_tarefas.auth.dto.response.TokenResponse;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.response.UserResponse;
@@ -36,12 +35,18 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AccessTokenResponse> refresh(@RequestBody @Valid RefreshRequest request) {
+    public ResponseEntity<TokenResponse> refresh(@RequestBody @Valid RefreshTokenRequest request) {
         return ResponseEntity.ok(authService.refresh(request));
     }
 
     @PostMapping("/restore")
     public ResponseEntity<TokenResponse> restore(@RequestBody @Valid LoginRequest request) {
         return ResponseEntity.ok(authService.restoreAndLogin(request.email(), request.password()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody @Valid RefreshTokenRequest request) {
+        authService.logout(request);
+        return ResponseEntity.noContent().build();
     }
 }

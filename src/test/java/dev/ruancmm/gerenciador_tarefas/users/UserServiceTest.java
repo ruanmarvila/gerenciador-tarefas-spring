@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import dev.ruancmm.gerenciador_tarefas.auth.RefreshTokenService;
 import dev.ruancmm.gerenciador_tarefas.core.exception.AuthenticationException;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserUpdatePasswordRequest;
@@ -32,6 +33,9 @@ public class UserServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private RefreshTokenService refreshService;
 
     @InjectMocks
     private UserService userService;
@@ -187,6 +191,7 @@ public class UserServiceTest {
         
         assertEquals("hashed-54321", currentUser.getPassword());
         verify(userRepository).save(currentUser);
+        verify(refreshService).revokeAllForUser(currentUser.getId());
     }
 
     @Test
@@ -220,6 +225,7 @@ public class UserServiceTest {
         userService.delete(currentUser);
 
         verify(userRepository).delete(currentUser);
+        verify(refreshService).revokeAllForUser(currentUser.getId());
     }
 
     @Test

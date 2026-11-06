@@ -20,25 +20,18 @@ public class JwtUtil {
 
     private SecretKey key;
     private final long accessExpiration;
-    private final long refreshExpiration;
 
     public JwtUtil(
         @Value("${jwt.secret}") String secret,
-        @Value("${jwt.access-expiration}") long accessExpiration,
-        @Value("${jwt.refresh-expiration}") long refreshExpiration) {
+        @Value("${jwt.access-expiration}") long accessExpiration) {
         this.key = Keys.hmacShaKeyFor(
             Decoders.BASE64.decode(secret)
         );
         this.accessExpiration = accessExpiration;
-        this.refreshExpiration = refreshExpiration;
     }
 
     public String generateAccessToken(Long userId) {
         return generateToken(userId, "access", accessExpiration);
-    }
-
-    public String generateRefreshToken(Long userId) {
-        return generateToken(userId, "refresh", refreshExpiration);
     }
 
     private String generateToken(Long userId, String type, long duration) {

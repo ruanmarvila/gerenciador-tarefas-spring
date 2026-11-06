@@ -21,11 +21,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import dev.ruancmm.gerenciador_tarefas.auth.dto.request.RefreshRequest;
-import dev.ruancmm.gerenciador_tarefas.auth.dto.response.AccessTokenResponse;
+import dev.ruancmm.gerenciador_tarefas.auth.RotationResult.Rejected.Reason;
+import dev.ruancmm.gerenciador_tarefas.auth.dto.request.RefreshTokenRequest;
 import dev.ruancmm.gerenciador_tarefas.auth.dto.response.TokenResponse;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountAlreadyActivateException;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountDisabledException;
+import dev.ruancmm.gerenciador_tarefas.auth.exception.InvalidTokenException;
 import dev.ruancmm.gerenciador_tarefas.core.exception.AuthenticationException;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.response.UserResponse;
@@ -54,11 +55,14 @@ public class AuthServiceTest {
     @Mock
     private JwtUtil jwtUtil;
 
+    @Mock
+    private RefreshTokenService refreshTokenService;
+
     @InjectMocks
     private AuthService authService;
 
     @Test
-    void shouldDelegateToUserService() {
+    void shouldDelegateRegisterToUserService() {
         UserCreateRequest request = new UserCreateRequest("Bob", "bob@gmail.com", "44444");
         UserResponse response = new UserResponse(1L, "Bob", "bob@gmail.com");
 
@@ -85,7 +89,7 @@ public class AuthServiceTest {
         when(jwtUtil.generateAccessToken(user.getId()))
             .thenReturn("access");
 
-        when(jwtUtil.generateRefreshToken(user.getId()))
+        when(refreshTokenService.issueForNewSession(user.getId()))
             .thenReturn("refresh");
 
         TokenResponse result = authService.login("ana@gmail.com", "12345");
@@ -95,7 +99,7 @@ public class AuthServiceTest {
         assertEquals("refresh", result.refreshToken());
 
         verify(jwtUtil).generateAccessToken(user.getId());
-        verify(jwtUtil).generateRefreshToken(user.getId());
+        verify(refreshTokenService).issueForNewSession(user.getId());
     }
 
     @Test
@@ -173,19 +177,33 @@ public class AuthServiceTest {
     }
 
     @Test
-    void shouldReturnAccessToken() {
+    void shouldRefreshTokens() {
         Long userId = 1L;
-        RefreshRequest request = new RefreshRequest("refreshToken");
+        RefreshTokenRequest request = new RefreshTokenRequest("refreshToken");
 
-        when(jwtUtil.extractUserId(request.refreshToken(), "refresh"))
-            .thenReturn(userId);
+        when(refreshTokenService.rotate(any(String.class)))
+            .thenReturn(new RotationResult.Rotated(userId, "refresh"));
 
         when(jwtUtil.generateAccessToken(userId))
             .thenReturn("access");
 
-        AccessTokenResponse result = authService.refresh(request);
+        TokenResponse result = authService.refresh(request);
 
         assertEquals("access", result.accessToken());
+        assertEquals("refresh", result.refreshToken());
+    }
+
+    @Test
+    void shouldRejectRefreshWhenReusedToken() {
+        RefreshTokenRequest request = new RefreshTokenRequest("refreshToken");
+
+        when(refreshTokenService.rotate(any(String.class)))
+            .thenReturn(new RotationResult.Rejected(Reason.REUSE_DETECTED));
+
+        assertThrows(
+            InvalidTokenException.class,
+            () -> authService.refresh(request)
+        );
     }
 
     @Test
@@ -206,7 +224,7 @@ public class AuthServiceTest {
         when(jwtUtil.generateAccessToken(user.getId()))
             .thenReturn("access");
 
-        when(jwtUtil.generateRefreshToken(user.getId()))
+        when(refreshTokenService.issueForNewSession(user.getId()))
             .thenReturn("refresh");
         
         TokenResponse result = authService.restoreAndLogin(email, password);
@@ -286,4 +304,13 @@ public class AuthServiceTest {
             () -> authService.restoreAndLogin(email, password)
         );
     }
-}
+
+    @Test
+    void shouldDelegateLogoutToRefreshTokenService() {
+        RefreshTokenRequest request = new RefreshTokenRequest("refreshToken");
+
+        authService.logout(request);
+
+        verify(refreshTokenService).revoke(request.refreshToken());
+    }
+ }
