@@ -1,7 +1,10 @@
 package dev.ruancmm.gerenciador_tarefas.tasks;
 
+import java.util.Set;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,12 +12,14 @@ import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskFilterRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskUpdateRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.response.TaskResponse;
+import dev.ruancmm.gerenciador_tarefas.tasks.exception.InvalidSortException;
 import dev.ruancmm.gerenciador_tarefas.tasks.exception.TaskNotFoundException;
 import dev.ruancmm.gerenciador_tarefas.users.User;
 
 @Service
 public class TaskService {
 
+    private static final Set<String> SORTABLE_FIELDS = Set.of("createdAt", "updatedAt", "title");
     private final TaskRepository taskRepository;
 
     public TaskService(TaskRepository taskRepository) {
@@ -27,11 +32,13 @@ public class TaskService {
     }
 
     public Page<TaskResponse> list(TaskFilterRequest filter, Pageable pageable, Long userId) {
+        validateSort(pageable);
         return taskRepository.findAll(TaskSpecification.withFilter(filter, userId), pageable)
             .map(TaskResponse::fromEntity);
     }
 
     public Page<TaskResponse> listDeleted(Pageable pageable, Long userId) {
+        validateSort(pageable);
         return taskRepository.findAllDeletedByUserId(userId, pageable)
             .map(TaskResponse::fromEntity);
     }
@@ -80,6 +87,14 @@ public class TaskService {
     @Transactional
     public void emptyTrash(Long userId) {
         taskRepository.deleteAllDeletedByUserId(userId);
+    }
+
+    private void validateSort(Pageable pageable) {
+        for (Sort.Order order : pageable.getSort()) {
+            if (!SORTABLE_FIELDS.contains(order.getProperty())) {
+                throw new InvalidSortException(order.getProperty());
+            }
+        }
     }
 
 }

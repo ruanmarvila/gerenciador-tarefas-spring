@@ -94,4 +94,78 @@ public class TaskIntegrationTest {
         .andExpect(jsonPath("$.description").value("Created by integration test"))
         .andExpect(jsonPath("$.status").value("TODO"));
     }
+
+    @Test
+    void shouldPaginateOnlyTheAuthenticatedUsersTasks() throws Exception {
+        Session ownerSession = auth.registerAndLogin("Owner", uniqueEmail(), "ownerPassword");
+        Session otherSession = auth.registerAndLogin("Other", uniqueEmail(), "otherPassword");
+
+        for (int i = 1; i <= 25; i++) {
+            auth.createTask(ownerSession.accessToken(), "Task " + i);
+        }
+
+        for (int i = 1; i <= 5; i++) {
+            auth.createTask(otherSession.accessToken(), "Other " + i);
+        }
+
+        mockMvc.perform(get("/tasks?page=0&size=20")
+            .header("Authorization", "Bearer " + ownerSession.accessToken()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content.length()").value(20))
+        .andExpect(jsonPath("$.page.totalElements").value(25))
+        .andExpect(jsonPath("$.page.totalPages").value(2));
+        
+        mockMvc.perform(get("/tasks?page=1&size=5")
+            .header("Authorization", "Bearer " + ownerSession.accessToken()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.content.length()").value(5));
+    }
+
+    @Test
+    void shouldCapPageSizeAtTheMaximum() throws Exception {
+        Session session = auth.registerAndLogin("Owner", uniqueEmail(), "ownerPassword");
+        auth.createTask(session.accessToken(), "Only task");
+
+        mockMvc.perform(get("/tasks?size=1000")
+                .header("Authorization", "Bearer " + session.accessToken()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.page.size").value(50));
+    }
+
+    @Test
+    void shouldReturn400WhenSortPropertyIsInvalid() throws Exception {
+        Session session = auth.registerAndLogin("Owner", uniqueEmail(), "ownerPassword");
+
+        mockMvc.perform(get("/tasks?sort=isDeleted,desc")
+                .header("Authorization", "Bearer " + session.accessToken()))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldSortByTitleAscending() throws Exception {
+        Session session = auth.registerAndLogin("Owner", uniqueEmail(), "ownerPassword");
+        auth.createTask(session.accessToken(), "Banana");
+        auth.createTask(session.accessToken(), "Apple");
+
+        mockMvc.perform(get("/tasks?sort=title,asc")
+                .header("Authorization", "Bearer " + session.accessToken()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content[0].title").value("Apple"))
+            .andExpect(jsonPath("$.content[1].title").value("Banana"));
+    }
+
+    @Test
+    void shouldNotListTasksFromTheTrash() throws Exception {
+        Session session = auth.registerAndLogin("Owner", uniqueEmail(), "ownerPassword");
+        auth.createTask(session.accessToken(), "Keep");
+        long deletedId = auth.createTask(session.accessToken(), "Delete me");
+
+        mockMvc.perform(delete("/tasks/{id}", deletedId)
+                .header("Authorization", "Bearer " + session.accessToken()))
+            .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/tasks")
+                .header("Authorization", "Bearer " + session.accessToken()))
+            .andExpect(jsonPath("$.page.totalElements").value(1));
+    }
 }
