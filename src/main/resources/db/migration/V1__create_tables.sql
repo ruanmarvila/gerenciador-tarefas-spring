@@ -10,12 +10,16 @@ CREATE TABLE users (
 
 CREATE TABLE tasks(
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    user_id BIGINT NOT NULL REFERENCES users(id),
+    user_id BIGINT NOT NULL,
     title VARCHAR(255) NOT NULL DEFAULT 'title',
     description TEXT NOT NULL DEFAULT 'description',
     status VARCHAR(20) NOT NULL DEFAULT 'TODO',
     CHECK(status IN ('TODO', 'IN_PROGRESS', 'DONE')),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP
+    deleted_at TIMESTAMP,
+    CONSTRAINT tasks_user_id_fkey
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE INDEX idx_tasks_user_id ON tasks(user_id);
