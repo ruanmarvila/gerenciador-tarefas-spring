@@ -241,4 +241,30 @@ public class TaskRepositoryTest {
         assertEquals(task2.getId(), found.getId());
         assertEquals(task2.getDeletedAt(), found.getDeletedAt());
     }
+
+    @Test
+    void shouldPurgeOnlyTasksTrashedBeforeLimit() {
+        Task task1 = new Task(user, "Test", null);
+        Task task2 = new Task(user, "5 days", null);
+        Task task3 = new Task(user, "40 days", null);
+
+        task2.setDeletedAt(LocalDateTime.now().minusDays(5));
+        task3.setDeletedAt(LocalDateTime.now().minusDays(40));
+
+        taskRepository.saveAll(List.of(task1, task2, task3));
+
+        int removed = taskRepository.purgeTrash(LocalDateTime.now().minusDays(30));
+        em.flush();
+        em.clear();
+
+        assertEquals(1, removed);
+        assertEquals(1, taskRepository.findAll().size());
+        assertEquals(1, count());
+    }
+
+    private long count() {
+        return ((Number) em.createNativeQuery(
+            "SELECT COUNT(*) FROM tasks WHERE deleted_at IS NOT NULL")
+                .getSingleResult()).longValue(); 
+    }
 }

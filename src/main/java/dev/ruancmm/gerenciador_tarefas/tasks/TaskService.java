@@ -1,5 +1,6 @@
 package dev.ruancmm.gerenciador_tarefas.tasks;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import org.springframework.data.domain.Page;
@@ -87,6 +88,12 @@ public class TaskService {
     @Transactional
     public void emptyTrash(Long userId) {
         taskRepository.deleteAllDeletedByUserId(userId);
+    }
+
+    @Transactional
+    public int purgeExpiredTrash() {
+        LocalDateTime limit = LocalDateTime.now().minusDays(30);
+        return taskRepository.purgeTrash(limit);
     }
 
     private void validateSort(Pageable pageable) {

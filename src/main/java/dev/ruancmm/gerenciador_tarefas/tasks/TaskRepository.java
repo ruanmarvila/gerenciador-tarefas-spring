@@ -1,5 +1,6 @@
 package dev.ruancmm.gerenciador_tarefas.tasks;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -33,4 +34,8 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
         nativeQuery = true
     )
     void deleteAllDeletedByUserId(@Param("userId") Long userId);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = "DELETE FROM tasks WHERE deleted_at < :limit", nativeQuery = true)
+    int purgeTrash(@Param("limit") LocalDateTime limit);
 }
