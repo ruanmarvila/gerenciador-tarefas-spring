@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import dev.ruancmm.gerenciador_tarefas.auth.JwtUtil;
-import dev.ruancmm.gerenciador_tarefas.core.security.SecurityConfig;
+import dev.ruancmm.gerenciador_tarefas.core.config.SecurityConfig;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserUpdatePasswordRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserUpdateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.response.UserResponse;

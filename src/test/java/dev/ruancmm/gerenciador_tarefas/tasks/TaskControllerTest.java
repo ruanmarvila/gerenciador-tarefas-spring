@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 import dev.ruancmm.gerenciador_tarefas.auth.JwtUtil;
-import dev.ruancmm.gerenciador_tarefas.core.security.SecurityConfig;
+import dev.ruancmm.gerenciador_tarefas.core.config.SecurityConfig;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskUpdateRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskFilterRequest;

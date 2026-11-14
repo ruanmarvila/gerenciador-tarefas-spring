@@ -1,4 +1,4 @@
-package dev.ruancmm.gerenciador_tarefas.core.security;
+package dev.ruancmm.gerenciador_tarefas.core.config;
 
 import java.time.Clock;
 

@@ -16,13 +16,14 @@ import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabas
 import org.springframework.context.annotation.Import;
 
 import dev.ruancmm.gerenciador_tarefas.config.PostgresContainerConfig;
+import dev.ruancmm.gerenciador_tarefas.core.config.JpaAuditingConfig;
 import dev.ruancmm.gerenciador_tarefas.users.User;
 import dev.ruancmm.gerenciador_tarefas.users.UserRepository;
 import jakarta.persistence.EntityManager;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(PostgresContainerConfig.class)
+@Import({PostgresContainerConfig.class, JpaAuditingConfig.class})
 class RefreshTokenRepositoryTest {
 
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 11, 5, 12, 0);

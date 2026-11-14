@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 
 import dev.ruancmm.gerenciador_tarefas.config.PostgresContainerConfig;
+import dev.ruancmm.gerenciador_tarefas.core.config.JpaAuditingConfig;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskFilterRequest;
 import dev.ruancmm.gerenciador_tarefas.users.User;
 import dev.ruancmm.gerenciador_tarefas.users.UserRepository;
@@ -26,7 +27,7 @@ import jakarta.persistence.EntityManager;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(PostgresContainerConfig.class)
+@Import({PostgresContainerConfig.class, JpaAuditingConfig.class})
 public class TaskRepositoryTest {
 
     @Autowired

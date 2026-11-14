@@ -14,11 +14,12 @@ import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabas
 import org.springframework.context.annotation.Import;
 
 import dev.ruancmm.gerenciador_tarefas.config.PostgresContainerConfig;
+import dev.ruancmm.gerenciador_tarefas.core.config.JpaAuditingConfig;
 import jakarta.persistence.EntityManager;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Import(PostgresContainerConfig.class)
+@Import({PostgresContainerConfig.class, JpaAuditingConfig.class})
 public class UserRepositoryTest {
 
     @Autowired
