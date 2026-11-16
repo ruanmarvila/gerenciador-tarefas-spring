@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.ruancmm.gerenciador_tarefas.auth.RefreshTokenService;
+import dev.ruancmm.gerenciador_tarefas.core.audit.Audited;
 import dev.ruancmm.gerenciador_tarefas.core.exception.AuthenticationException;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.users.dto.request.UserUpdateRequest;
@@ -50,6 +51,7 @@ public class UserService {
         return UserResponse.fromEntity(userRepository.save(currentUser));
     }
 
+    @Audited(action = "PASSWORD_CHANGE")
     @Transactional
     public void updatePassword(UserUpdatePasswordRequest request, User currentUser) {
         if (request.password().equals(request.newPassword())) {
@@ -67,6 +69,7 @@ public class UserService {
         refreshService.revokeAllForUser(currentUser.getId());
     }
 
+    @Audited(action = "ACCOUNT_DELETE")
     @Transactional
     public void delete(User currentUser) {
         userRepository.delete(currentUser);

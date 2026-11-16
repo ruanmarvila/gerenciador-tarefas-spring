@@ -17,6 +17,7 @@ import dev.ruancmm.gerenciador_tarefas.auth.dto.response.TokenResponse;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountAlreadyActivateException;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.AccountDisabledException;
 import dev.ruancmm.gerenciador_tarefas.auth.exception.InvalidTokenException;
+import dev.ruancmm.gerenciador_tarefas.core.audit.Audited;
 import dev.ruancmm.gerenciador_tarefas.core.exception.AuthenticationException;
 import dev.ruancmm.gerenciador_tarefas.users.User;
 import dev.ruancmm.gerenciador_tarefas.users.UserRepository;
@@ -47,6 +48,7 @@ public class AuthService {
     return userService.create(request);
   }
 
+  @Audited(action = "LOGIN")
   public TokenResponse login(String email, String password) {
     try {
       Authentication auth = authenticationManager.authenticate(
@@ -65,6 +67,7 @@ public class AuthService {
     }
   }
 
+  @Audited(action = "TOKEN_REFRESH")
   public TokenResponse refresh(RefreshTokenRequest request) {
     return switch (refreshTokenService.rotate(request.refreshToken())) {
       case RotationResult.Rotated r -> new TokenResponse(
@@ -74,6 +77,7 @@ public class AuthService {
     };
   }
 
+  @Audited(action = "ACCOUNT_RESTORE")
   @Transactional
   public TokenResponse restoreAndLogin(String email, String password) {
     User user = userRepository.findByEmailIncludingDeleted(email).
@@ -99,6 +103,7 @@ public class AuthService {
     );
   }
 
+  @Audited(action = "LOGOUT")
   public void logout(RefreshTokenRequest request) {
     refreshTokenService.revoke(request.refreshToken());
   }

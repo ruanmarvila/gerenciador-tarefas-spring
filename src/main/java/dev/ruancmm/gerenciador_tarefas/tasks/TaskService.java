@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import dev.ruancmm.gerenciador_tarefas.core.audit.Audited;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskCreateRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskFilterRequest;
 import dev.ruancmm.gerenciador_tarefas.tasks.dto.request.TaskUpdateRequest;
@@ -85,6 +86,7 @@ public class TaskService {
         taskRepository.delete(task);
     }
 
+    @Audited(action = "TRASH_EMPTY")
     @Transactional
     public void emptyTrash(Long userId) {
         taskRepository.deleteAllDeletedByUserId(userId);
